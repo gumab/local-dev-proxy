@@ -22,6 +22,6 @@
   "license": "ISC",
   "dependencies": {
     "arg": "^5.0.2",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^2.7.0"
   }
 }
