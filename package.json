@@ -20,7 +20,7 @@
   "keywords": [],
   "author": "배창원",
   "license": "ISC",
-  "peerDependencies": {
+  "dependencies": {
     "arg": "^5.0.2"
   }
 }
