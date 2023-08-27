@@ -38,7 +38,7 @@ async function register(port, {rule, subRules = []}) {
         if (await healthCheck()) {
           return;
         }
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
       throw new Error('서버를 확인해주세요');
     })();

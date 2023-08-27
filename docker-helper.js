@@ -1,13 +1,22 @@
 const {exec} = require('child_process');
 
 const execAsync = (command) => new Promise(
-    (resolve, reject) => exec(command, (error, stdout) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(stdout);
-      }
-    }));
+    (resolve, reject) => {
+      const child = exec(command, (error, stdout) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(stdout);
+        }
+      });
+      child.stdout.on('data', function(data) {
+        console.log(data);
+      });
+
+      child.stderr.on('data', function(data) {
+        console.error(data);
+      });
+    });
 
 async function run() {
   try {
