@@ -47,11 +47,6 @@ async function register(port, {rule, subRules = []}) {
     // throw new Error('proxy server is not running');
   }
 
-  rule instanceof Array ? rule.map(x => ({
-    ...x,
-    target,
-  })) : [rule];
-
   const target = `http://localhost:${port}`;
   const res = await fetch('http://localhost/__setting/register', {
     method: 'post',
