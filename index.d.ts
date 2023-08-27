@@ -3,6 +3,7 @@ export interface LocalDevProxyRule {
     priority?: number;
     path?: RegExp | string;
     host?: RegExp | string;
+    referrer?: RegExp;
     pathRewrite?: { [key: string]: string };
 }
 
@@ -11,7 +12,7 @@ export interface LocalDevProxySubRule extends LocalDevProxyRule {
 }
 
 export interface LocalDevProxyOption {
-    rule: LocalDevProxyRule;
+    rule: LocalDevProxyRule | LocalDevProxyRule[];
     subRules?: LocalDevProxySubRule[];
 }
 

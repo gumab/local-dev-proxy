@@ -30,6 +30,7 @@ type RouteRule = {
     priority?: number
     path?: string | RegExp,
     host?: string | RegExp,
+    referrer?: RegExp,
     pathRewrite?: { [key: string]: string }
     target: string,
 }
@@ -41,18 +42,21 @@ type RouteRuleRequest = {
     pathRegex?: string,
     host?: string,
     hostRegex?: string,
+    referrerRegex?: string,
     pathRewrite?: { [key: string]: string }
     target: string,
 }
 
-const routeRules: RouteRule[] = [];
+const storage: { routeRules: RouteRule[] } = {
+    routeRules: []
+}
 
 const settingRouter = express.Router()
 
-function getStringOrRegex(strInput?: string, regexInput?: string) {
-    if (strInput) {
-        return strInput
-    } else if (regexInput) {
+function getStringOrRegex(regexInput?: string): RegExp | undefined
+function getStringOrRegex(regexInput?: string, strInput?: string): RegExp | string | undefined
+function getStringOrRegex(regexInput?: string, strInput?: string) {
+    if (regexInput) {
         try {
             const rgx = eval(regexInput)
             if (rgx instanceof RegExp) {
@@ -61,30 +65,35 @@ function getStringOrRegex(strInput?: string, regexInput?: string) {
         } catch (e) {
             // return nothing
         }
+    } else if (strInput) {
+        return strInput
     }
 }
 
-function addRule(req: RouteRuleRequest) {
-    let idx = -1
-    do {
-        idx = routeRules.findIndex(x => x.target === req.target || x.key === req.key)
-        if (idx >= 0) {
-            routeRules.splice(idx, 1)
-        }
-    } while (idx >= 0)
-    const {host, hostRegex, path, pathRegex, ...rest} = req
-    routeRules.push({
-        ...rest,
-        host: getStringOrRegex(host, hostRegex),
-        path: getStringOrRegex(path, pathRegex),
-    })
+function addRules(req: RouteRuleRequest[]) {
+    storage.routeRules = storage.routeRules
+        .filter(x => !req.some(y => y.key === x.key || y.target === x.target))
+        .concat(req.map(({
+                             host,
+                             hostRegex,
+                             path,
+                             pathRegex,
+                             referrerRegex,
+                             ...rest
+                         }) => ({
+
+            ...rest,
+            host: getStringOrRegex(host, hostRegex),
+            path: getStringOrRegex(path, pathRegex),
+            referrer: getStringOrRegex(referrerRegex),
+        })))
 }
 
 function checkRequest(body: RouteRuleRequest[] | RouteRuleRequest): boolean {
     if (body instanceof Array) {
         return body.length > 0 && body.every(checkRequest)
     } else if (body) {
-        return Boolean(body.key && (body.path || body.host || body.pathRegex || body.hostRegex))
+        return Boolean(body.key && (body.path || body.host || body.pathRegex || body.hostRegex || body.referrerRegex))
     }
     return false
 }
@@ -96,19 +105,20 @@ settingRouter.post('/register', (req: Request, res: Response) => {
         return
     }
     if (data instanceof Array) {
-        data.forEach(addRule)
+        addRules(data)
     } else {
-        addRule(data)
+        addRules([data])
     }
 
     res.json({success: true});
 });
 
 settingRouter.get('/rules', (req: Request, res: Response) => {
-    res.json(routeRules.map(x => ({
+    res.json(storage.routeRules.map(x => ({
         ...x,
         host: x.host?.toString(),
-        path: x.path?.toString()
+        path: x.path?.toString(),
+        referrer: x.referrer?.toString()
     })));
 });
 
@@ -124,10 +134,10 @@ function fixLocalHost<T extends { target: string }>(input: T) {
 }
 
 function makeProxyOption(req: Request): { target: string, ignorePath?: boolean } {
-    const sorted = routeRules.sort((a, b) => (a.priority || Number.MAX_VALUE) - (b.priority || Number.MAX_VALUE))
+    const sorted = storage.routeRules.sort((a, b) => (a.priority || Number.MAX_VALUE) - (b.priority || Number.MAX_VALUE))
     const rule = sorted.find(({
                                   host,
-                                  path
+                                  path, referrer
                               }) => {
         if (host) {
             if (typeof host === "string") {
@@ -149,6 +159,11 @@ function makeProxyOption(req: Request): { target: string, ignorePath?: boolean }
                 if (!path.test(req.path)) {
                     return false;
                 }
+            }
+        }
+        if (referrer) {
+            if (!referrer.test(req.header('referrer') || '')) {
+                return false;
             }
         }
         return true;

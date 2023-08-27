@@ -16,6 +16,7 @@ function packRequest(input) {
     hostRegex: input.host && typeof input.host !== 'string' ?
         input.host.toString() :
         null,
+    referrerRegex: input.referrer ? input.referrer.toString() : null,
   };
 }
 
@@ -46,6 +47,11 @@ async function register(port, {rule, subRules = []}) {
     // throw new Error('proxy server is not running');
   }
 
+  rule instanceof Array ? rule.map(x => ({
+    ...x,
+    target,
+  })) : [rule];
+
   const target = `http://localhost:${port}`;
   const res = await fetch('http://localhost/__setting/register', {
     method: 'post',
@@ -53,10 +59,10 @@ async function register(port, {rule, subRules = []}) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify([
-      {
+      ...(rule instanceof Array ? rule.map(x => ({
+        ...x,
         target,
-        ...rule,
-      }, ...subRules].map(packRequest)),
+      })) : [rule]), ...subRules].map(packRequest)),
   });
   if (res.status === 200) {
     console.log(`[local-dev-proxy] 등록 완료 [${rule.host} >> ${target}]`);
