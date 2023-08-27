@@ -4,6 +4,9 @@ const {register} = require('..');
 const {createServer} = require('http');
 
 function getPort(defaultPort) {
+  if (!defaultPort) {
+    throw new Error('port 옵션을 설정해주세요');
+  }
   const server = createServer((req, res) => {
   });
 
@@ -28,25 +31,42 @@ function getPort(defaultPort) {
 
 const args = require('arg')({
   '--nextjs': Boolean,
+  '--reactjs': Boolean,
+  '--storybook': Boolean,
   '--port': Number,
   '-p': '--port',
+  '--next': '--nextjs',
+  '--react': '--reactjs',
+  '--sb': '--storybook',
 });
 
-async function main() {
-  console.log(args['next']);
-
-  try {
-
-    /** @type {number} */
-    const port = args['--port'] || Number(process.env.PORT) ||
-        (await getPort(3000));
-
-    /** @type {KurlyLocalProxyOption} */
-    const config = require(path.join(process.cwd(), '.klprc.js'));
-    await register(port, config);
-  } catch (e) {
-    console.error(e);
+function getDefaultPort() {
+  if (args['--nextjs']) {
+    return 3000;
+  } else if (args['--reactjs']) {
+    return 3000;
+  } else if (args['--storybook']) {
+    return 6006;
   }
+  return 0;
+}
+
+function getConfig() {
+  try {
+    return require(path.join(process.cwd(), '.klprc.js'));
+  } catch (e) {
+    throw new Error('.klprc.js 파일이 필요합니다');
+  }
+}
+
+async function main() {
+  /** @type {number} */
+  const port = args['--port'] || Number(process.env.PORT) ||
+      (await getPort(getDefaultPort()));
+
+  /** @type {KurlyLocalProxyOption} */
+  const config = getConfig();
+  await register(port, config);
 }
 
 main();

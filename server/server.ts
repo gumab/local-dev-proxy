@@ -13,7 +13,7 @@ const httpsPort = Number(process.env.HTTPS_PORT) || 443;
 const app = express();
 app.use(bodyParser.json())
 
-const proxy = httpProxy.createProxyServer({
+const proxyServer = httpProxy.createProxyServer({
     secure: false,
     changeOrigin: true,
     target: {
@@ -21,12 +21,12 @@ const proxy = httpProxy.createProxyServer({
     },
 });
 
-proxy.on('error', (err: Error, req: Request, res: Response) => {
-    console.error(err)
+proxyServer.on('error', (err: Error, req: Request, res: Response) => {
     res.status(500).send('Error occurr' + err);
 });
 
 type RouteRule = {
+    key: string
     priority?: number
     path?: string | RegExp,
     host?: string | RegExp,
@@ -35,6 +35,7 @@ type RouteRule = {
 }
 
 type RouteRuleRequest = {
+    key: string
     priority?: number
     path?: string,
     pathRegex?: string,
@@ -44,59 +45,11 @@ type RouteRuleRequest = {
     target: string,
 }
 
-const ENV_FIX: { [key: string]: string } = {
-    'development': '.dev',
-    'stage': '.stg',
-    'performance': '.perf',
-    'production': ''
-}
-
-
-const getPhpUrl = (env: string) =>
-    `https://www${ENV_FIX[env]}.kurly.com`
-const getCampaignUrl = (env: string) =>
-    `https://campaign${ENV_FIX[env].replace('.stg', '-stg')}.kurly.com`
-
-const phpRouteRule: RouteRule = {
-    priority: 3,
-    host: 'www.local.kurly.com',
-    target: getPhpUrl('development'),
-}
-
-const campaignRouteRule: RouteRule = {
-    priority: 2,
-    host: 'www.local.kurly.com',
-    path: /^\/campaign/,
-    pathRewrite: {
-        '^/campaign': '',
-    },
-    target: getCampaignUrl('development'),
-}
-
-const routeRules: RouteRule[] = [phpRouteRule, campaignRouteRule];
+const routeRules: RouteRule[] = [];
 
 const defaultServer = 'http://localhost:3000';
 
 const settingRouter = express.Router()
-
-settingRouter.post('/phpservers', (req: Request, res: Response) => {
-    const env = req.body.env
-    const host = req.body.host
-    if (host || env) {
-        if (host) {
-            phpRouteRule.host = host
-            campaignRouteRule.host = host
-        }
-        if (/production|performance|stage|development/.test(env)) {
-            phpRouteRule.target = getPhpUrl(env)
-            campaignRouteRule.target = getCampaignUrl(env)
-        }
-        res.json({success: true, data: [phpRouteRule, campaignRouteRule]});
-        return
-    }
-
-    throw new Error('invalid host or env name (production|performance|stage|development)')
-});
 
 function getStringOrRegex(strInput?: string, regexInput?: string) {
     if (strInput) {
@@ -114,31 +67,26 @@ function getStringOrRegex(strInput?: string, regexInput?: string) {
 }
 
 function addRule(req: RouteRuleRequest) {
-    const idx = routeRules.findIndex(x => x.target === req.target)
-    if (idx >= 0) {
-        routeRules.splice(idx, 1)
-    }
-    routeRules.push({
-        ...req,
-        host: getStringOrRegex(req.host, req.hostRegex),
-        path: getStringOrRegex(req.path, req.pathRegex)
-    })
-}
-
-const regExpToString = (input?: RegExp | string) => {
-    if (input) {
-        if (typeof input === 'string') {
-            return input
+    let idx = -1
+    do {
+        idx = routeRules.findIndex(x => x.target === req.target || x.key === req.key)
+        if (idx >= 0) {
+            routeRules.splice(idx, 1)
         }
-        return input.toString().replace(/^\/(.+)\/$/, '$1')
-    }
+    } while (idx >= 0)
+    const {host, hostRegex, path, pathRegex, ...rest} = req
+    routeRules.push({
+        ...rest,
+        host: getStringOrRegex(host, hostRegex),
+        path: getStringOrRegex(path, pathRegex),
+    })
 }
 
 function checkRequest(body: RouteRuleRequest[] | RouteRuleRequest): boolean {
     if (body instanceof Array) {
         return body.length > 0 && body.every(checkRequest)
     } else if (body) {
-        return Boolean(body.path || body.host || body.pathRegex || body.hostRegex)
+        return Boolean(body.key && (body.path || body.host || body.pathRegex || body.hostRegex))
     }
     return false
 }
@@ -161,14 +109,25 @@ settingRouter.post('/register', (req: Request, res: Response) => {
 settingRouter.get('/rules', (req: Request, res: Response) => {
     res.json(routeRules.map(x => ({
         ...x,
-        host: regExpToString(x.host),
-        path: regExpToString(x.path)
+        host: x.host?.toString(),
+        path: x.path?.toString()
     })));
 });
 
 app.use('/__setting', settingRouter)
 
-const makeProxyOption = (req: Request) => {
+function fixLocalHost<T extends { target: string }>(input: T) {
+    if (!process.env.LOCALHOST) {
+        return input
+    }
+
+    return {
+        ...input,
+        target: input.target.replace(/(https?:\/\/)(?:localhost|127\.0\.0\.1)/, '$1' + process.env.LOCALHOST)
+    }
+}
+
+function makeProxyOption(req: Request): { target: string, ignorePath?: boolean } {
     const sorted = routeRules.sort((a, b) => (a.priority || Number.MAX_VALUE) - (b.priority || Number.MAX_VALUE))
     const rule = sorted.find(({
                                   host,
@@ -217,12 +176,12 @@ const makeProxyOption = (req: Request) => {
     return {
         target: rule.target,
     };
-};
+}
 
 app.use((req: Request, res: Response) => {
-    const option = makeProxyOption(req)
+    const option = fixLocalHost(makeProxyOption(req))
     try {
-        proxy.web(req, res, option);
+        proxyServer.web(req, res, option);
     } catch (e) {
     }
 });

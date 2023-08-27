@@ -1,3 +1,5 @@
+const {run} = require('./docker-helper');
+
 /**
  * @param input {KurlyLocalProxySubRule}
  * @return {RouteRuleRequest}
@@ -16,40 +18,49 @@ function packRequest(input) {
   };
 }
 
+async function healthCheck() {
+  return await fetch('http://localhost/__setting/rules').
+      then((x) => x.status === 200).
+      catch(() => {
+      });
+}
+
 /**
  * @param port {number}
  * @param options {KurlyLocalProxyOption}
  */
-async function register(port, {rule, subRules}) {
-  console.log(rule, subRules);
-  try {
-    const checkResult = await fetch('http://localhost/__setting/rules').
-        then((x) => x.status === 200).
-        catch(() => {
-        });
-    if (!checkResult) {
-      console.log('proxy server is not running');
-      return;
-    }
+async function register(port, {rule, subRules = []}) {
+  if (!await healthCheck()) {
+    await run();
+    await (async function() {
+      let count = 0;
+      while (count++ < 10) {
+        if (await healthCheck()) {
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      throw new Error('서버를 확인해주세요');
+    })();
+    // throw new Error('proxy server is not running');
+  }
 
-    const res = await fetch('http://localhost/__setting/register', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify([
-        {
-          target: `http://localhost:${port}`,
-          ...rule,
-        }, ...subRules].map(packRequest)),
-    });
-    if (res.status === 200) {
-      console.log('registered');
-    } else {
-      console.error(res.statusText);
-    }
-  } catch (e) {
-    console.error(e);
+  const target = `http://localhost:${port}`;
+  const res = await fetch('http://localhost/__setting/register', {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify([
+      {
+        target,
+        ...rule,
+      }, ...subRules].map(packRequest)),
+  });
+  if (res.status === 200) {
+    console.log(`등록 완료 [${rule.host} >> ${target}]`);
+  } else {
+    throw new Error(`등록 실패`);
   }
 }
 
