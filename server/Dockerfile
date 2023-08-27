@@ -1,5 +1,7 @@
 FROM node:latest
 
+LABEL org.opencontainers.image.source='https://github.com/thefarmersfront/local-dev-proxy'
+
 ENV LOCALHOST=host.docker.internal
 ENV HTTP_PORT=8080
 ENV HTTPS_PORT=8443

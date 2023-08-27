@@ -5,7 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "start": "ts-node server.ts",
-    "build:docker": "docker build . -t @thefarmersfront/local-dev-proxy"
+    "build:docker": "docker build . -t ghcr.io/thefarmersfront/local-dev-proxy:latest"
   },
   "keywords": [],
   "author": "배창원",

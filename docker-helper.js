@@ -1,7 +1,7 @@
 const {exec} = require('child_process');
 
 const execAsync = (command) => new Promise(
-    (resolve, reject) => exec(command, (error, stdout, stderr) => {
+    (resolve, reject) => exec(command, (error, stdout) => {
       if (error) {
         reject(error);
       } else {
@@ -20,7 +20,7 @@ async function run() {
   }
   await execAsync('docker rm -f local-dev-proxy');
   await execAsync(
-      'docker run -d --name local-dev-proxy -p 80:8080 -p 443:8443 @thefarmersfront/local-dev-proxy:latest');
+      'docker run -d --name local-dev-proxy -p 80:8080 -p 443:8443 ghcr.io/thefarmersfront/local-dev-proxy:latest');
 }
 
 module.exports.run = run;
