@@ -117,13 +117,11 @@ settingRouter.get('/rules', (req: Request, res: Response) => {
 app.use('/__setting', settingRouter)
 
 function fixLocalHost<T extends { target: string }>(input: T) {
-    if (!process.env.LOCALHOST) {
-        return input
-    }
+    const localhostIp = process.env.LOCALHOST || '127.0.0.1'
 
     return {
         ...input,
-        target: input.target.replace(/(https?:\/\/)(?:localhost|127\.0\.0\.1)/, '$1' + process.env.LOCALHOST)
+        target: input.target.replace(/(https?:\/\/)(?:localhost|127\.0\.0\.1)/, '$1' + localhostIp)
     }
 }
 

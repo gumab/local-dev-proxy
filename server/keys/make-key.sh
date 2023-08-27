@@ -1,0 +1,1 @@
+openssl genrsa 1024 > _key.pem
