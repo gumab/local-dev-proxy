@@ -7,7 +7,7 @@ module.exports = {
       key: 'lego',
       priority: 1,
       host,
-      path: /^\/(?:lego)/,
+      path: /^\/lego\//,
     }, {
       key: 'lego',
       priority: 1,
@@ -19,7 +19,7 @@ module.exports = {
       key: 'lacms2',
       priority: 2,
       host,
-      target: `https://lacms2.dev.kurly.com`,
+      target: `https://lacms2.dev.kurlycorp.kr`,
     },
   ],
 };

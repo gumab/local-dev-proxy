@@ -83,8 +83,8 @@ function addRules(req: RouteRuleRequest[]) {
                          }) => ({
 
             ...rest,
-            host: getStringOrRegex(host, hostRegex),
-            path: getStringOrRegex(path, pathRegex),
+            host: getStringOrRegex(hostRegex, host),
+            path: getStringOrRegex(pathRegex, path),
             referrer: getStringOrRegex(referrerRegex),
         })))
 }
@@ -162,7 +162,7 @@ function makeProxyOption(req: Request): { target: string, ignorePath?: boolean }
             }
         }
         if (referrer) {
-            if (!referrer.test(req.header('referrer') || '')) {
+            if (!referrer.test(req.headers['referer']?.toString() || '')) {
                 return false;
             }
         }

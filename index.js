@@ -57,10 +57,11 @@ async function register(port, {rule, subRules = []}) {
       ...(rule instanceof Array ? rule.map(x => ({
         ...x,
         target,
-      })) : [rule]), ...subRules].map(packRequest)),
+      })) : [{...rule, target}]), ...subRules].map(packRequest)),
   });
   if (res.status === 200) {
-    console.log(`[local-dev-proxy] 등록 완료 [${rule.host} >> ${target}]`);
+    const first = (rule instanceof Array ? rule[0] : rule);
+    console.log(`[local-dev-proxy] 등록 완료 [${first.host} >> ${target}]`);
   } else {
     throw new Error(`[local-dev-proxy] 등록 실패 (${res.statusText})`);
   }
