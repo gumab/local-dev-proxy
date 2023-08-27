@@ -1,7 +1,7 @@
 const {run} = require('./docker-helper');
 
 /**
- * @param input {KurlyLocalProxySubRule}
+ * @param input {LocalDevProxySubRule}
  * @return {RouteRuleRequest}
  */
 function packRequest(input) {
@@ -27,7 +27,7 @@ async function healthCheck() {
 
 /**
  * @param port {number}
- * @param options {KurlyLocalProxyOption}
+ * @param options {LocalDevProxyOption}
  */
 async function register(port, {rule, subRules = []}) {
   if (!await healthCheck()) {

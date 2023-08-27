@@ -7,8 +7,7 @@ function getPort(defaultPort) {
   if (!defaultPort) {
     throw new Error('port 옵션을 설정해주세요');
   }
-  const server = createServer((req, res) => {
-  });
+  const server = createServer();
 
   return new Promise((resolve, reject) => {
     let port = defaultPort;
@@ -53,9 +52,9 @@ function getDefaultPort() {
 
 function getConfig() {
   try {
-    return require(path.join(process.cwd(), '.klprc.js'));
+    return require(path.join(process.cwd(), '.ldprc.js'));
   } catch (e) {
-    throw new Error('.klprc.js 파일이 필요합니다');
+    throw new Error('.ldprc.js 파일이 필요합니다');
   }
 }
 
@@ -64,7 +63,7 @@ async function main() {
   const port = args['--port'] || Number(process.env.PORT) ||
       (await getPort(getDefaultPort()));
 
-  /** @type {KurlyLocalProxyOption} */
+  /** @type {LocalDevProxyOption} */
   const config = getConfig();
   await register(port, config);
 }

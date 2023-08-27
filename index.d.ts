@@ -1,4 +1,4 @@
-export interface KurlyLocalProxyRule {
+export interface LocalDevProxyRule {
     key: string;
     priority?: number;
     path?: RegExp | string;
@@ -6,14 +6,14 @@ export interface KurlyLocalProxyRule {
     pathRewrite?: { [key: string]: string };
 }
 
-export interface KurlyLocalProxySubRule extends KurlyLocalProxyRule {
+export interface LocalDevProxySubRule extends LocalDevProxyRule {
     target: string;
 }
 
-export interface KurlyLocalProxyOption {
-    rule: KurlyLocalProxyRule;
-    subRules?: KurlyLocalProxySubRule[];
+export interface LocalDevProxyOption {
+    rule: LocalDevProxyRule;
+    subRules?: LocalDevProxySubRule[];
 }
 
-export function register(port: number, options: KurlyLocalProxyOption): void
+export function register(port: number, options: LocalDevProxyOption): void
 

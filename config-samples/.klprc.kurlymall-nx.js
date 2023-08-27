@@ -1,6 +1,6 @@
 const host = 'www.local.kurly.com';
 
-/** @type {import('kurly-local-proxy').KurlyLocalProxyOption} */
+/** @type {import('@thefarmersfront/local-dev-proxy').LocalDevProxyOption} */
 module.exports = {
   rule: {
     key: 'kurlymall-nx',

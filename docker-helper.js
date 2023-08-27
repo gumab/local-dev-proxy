@@ -18,9 +18,9 @@ async function run() {
     }
   } catch (e) {
   }
-  await execAsync('docker rm -f kurly-local-proxy');
+  await execAsync('docker rm -f local-dev-proxy');
   await execAsync(
-      'docker run -d --name kurly-local-proxy -p 80:8080 -p 443:8443 kurly-local-proxy:latest');
+      'docker run -d --name local-dev-proxy -p 80:8080 -p 443:8443 @thefarmersfront/local-dev-proxy:latest');
 }
 
 module.exports.run = run;

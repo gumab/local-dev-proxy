@@ -1,10 +1,10 @@
 {
-  "name": "kurly-local-proxy",
+  "name": "@thefarmersfront/local-dev-proxy",
   "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "bin": {
-    "kurly-local-proxy": "bin/kurly-local-proxy.js"
+    "local-dev-proxy": "bin/local-dev-proxy.js"
   },
   "scripts": {
     "test": "NODE_ENV=development node test.js"

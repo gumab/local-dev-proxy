@@ -1,4 +1,4 @@
-/** @type {import('kurly-local-proxy').KurlyLocalProxyOption} */
+/** @type {import('@thefarmersfront/local-dev-proxy').LocalDevProxyOption} */
 module.exports = {
   rule: {
     key: 'event-container',
