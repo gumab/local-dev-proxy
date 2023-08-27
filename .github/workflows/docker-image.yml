@@ -1,0 +1,21 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build server -t ghcr.io/thefarmersfront/local-dev-proxy:latest
+      
+    - name: Push Docker image
+      run: docker push ghcr.io/thefarmersfront/local-dev-proxy:latest
