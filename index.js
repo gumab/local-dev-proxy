@@ -1,4 +1,5 @@
 const {run} = require('./docker-helper');
+const fetch = require('node-fetch')
 
 /**
  * @param input {LocalDevProxySubRule}

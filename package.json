@@ -21,6 +21,7 @@
   "author": "배창원",
   "license": "ISC",
   "dependencies": {
-    "arg": "^5.0.2"
+    "arg": "^5.0.2",
+    "node-fetch": "^3.3.2"
   }
 }
