@@ -1,5 +1,5 @@
 const {run} = require('./docker-helper');
-const fetch = require('node-fetch')
+const fetch = require('node-fetch');
 
 /**
  * @param input {LocalDevProxySubRule}
@@ -35,13 +35,13 @@ async function register(port, {rule, subRules = []}) {
     await run();
     await (async function() {
       let count = 0;
-      while (count++ < 10) {
+      while (count++ < 20) {
         if (await healthCheck()) {
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-      throw new Error('서버를 확인해주세요');
+      throw new Error('[local-dev-proxy] 도커 서버의 상태를 확인해주세요');
     })();
     // throw new Error('proxy server is not running');
   }
@@ -59,9 +59,9 @@ async function register(port, {rule, subRules = []}) {
       }, ...subRules].map(packRequest)),
   });
   if (res.status === 200) {
-    console.log(`등록 완료 [${rule.host} >> ${target}]`);
+    console.log(`[local-dev-proxy] 등록 완료 [${rule.host} >> ${target}]`);
   } else {
-    throw new Error(`등록 실패`);
+    throw new Error(`[local-dev-proxy] 등록 실패 (${res.statusText})`);
   }
 }
 

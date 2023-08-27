@@ -5,7 +5,7 @@ const {createServer} = require('http');
 
 function getPort(defaultPort) {
   if (!defaultPort) {
-    throw new Error('port 옵션을 설정해주세요');
+    throw new Error('[local-dev-proxy] port 옵션을 설정해주세요 --next / --react / -p 8080 / ...');
   }
   const server = createServer();
 
@@ -54,7 +54,7 @@ function getConfig() {
   try {
     return require(path.join(process.cwd(), '.ldprc.js'));
   } catch (e) {
-    throw new Error('.ldprc.js 파일이 필요합니다');
+    throw new Error('[local-dev-proxy] .ldprc.js 파일이 필요합니다');
   }
 }
 

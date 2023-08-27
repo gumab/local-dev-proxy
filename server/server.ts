@@ -22,7 +22,7 @@ const proxyServer = httpProxy.createProxyServer({
 });
 
 proxyServer.on('error', (err: Error, req: Request, res: Response) => {
-    res.status(500).send('Error occurr' + err);
+    res.status(500).send(err);
 });
 
 type RouteRule = {
@@ -46,8 +46,6 @@ type RouteRuleRequest = {
 }
 
 const routeRules: RouteRule[] = [];
-
-const defaultServer = 'http://localhost:3000';
 
 const settingRouter = express.Router()
 
@@ -157,9 +155,7 @@ function makeProxyOption(req: Request): { target: string, ignorePath?: boolean }
     });
 
     if (!rule) {
-        return {
-            target: defaultServer
-        }
+        throw new Error(`[local-dev-proxy] 매칭되는 서버가 없습니다. (${req.hostname}${req.path})`)
     }
     if (rule.pathRewrite) {
         const rewrittenPath = Object.entries(rule.pathRewrite).reduce((path, [pattern, value]) => {
@@ -177,10 +173,15 @@ function makeProxyOption(req: Request): { target: string, ignorePath?: boolean }
 }
 
 app.use((req: Request, res: Response) => {
-    const option = fixLocalHost(makeProxyOption(req))
     try {
+        const option = fixLocalHost(makeProxyOption(req))
         proxyServer.web(req, res, option);
     } catch (e) {
+        if (e instanceof Error) {
+            res.status(500).send(e.message)
+        } else {
+            throw e
+        }
     }
 });
 
