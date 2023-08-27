@@ -1,1 +1,1 @@
-openssl req -x509 -new -nodes -passin pass:kurlycorp0987 -config cert.config -key key.pem -sha256 -extensions v3_req -days 3650 -out cert.pem
+openssl req -x509 -new -nodes -config cert.config -key key.pem -sha256 -extensions v3_req -days 36524 -out cert.pem
