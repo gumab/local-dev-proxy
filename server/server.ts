@@ -71,6 +71,11 @@ function getStringOrRegex(regexInput?: string, strInput?: string) {
 }
 
 function addRules(req: RouteRuleRequest[]) {
+    // 엎어칠수 없으면 문제가 되어서 일단 보류
+    // // 이미 로컬을 보고 있는게 있으면 엎어쓰지 않는다
+    // const filtered = req.filter(x =>
+    //     !storage.routeRules.some(y => y.key === x.key && /localhost|127\.0\.0\.1/.test(y.target)))
+
     storage.routeRules = storage.routeRules
         .filter(x => !req.some(y => y.key === x.key || y.target === x.target))
         .concat(req.map(({
@@ -86,7 +91,7 @@ function addRules(req: RouteRuleRequest[]) {
             host: getStringOrRegex(hostRegex, host),
             path: getStringOrRegex(pathRegex, path),
             referrer: getStringOrRegex(referrerRegex),
-        })))
+        }))).sort((a, b) => (a.priority || Number.MAX_VALUE) - (b.priority || Number.MAX_VALUE))
 }
 
 function checkRequest(body: RouteRuleRequest[] | RouteRuleRequest): boolean {
@@ -134,11 +139,10 @@ function fixLocalHost<T extends { target: string }>(input: T) {
 }
 
 function makeProxyOption(req: Request): { target: string, ignorePath?: boolean } {
-    const sorted = storage.routeRules.sort((a, b) => (a.priority || Number.MAX_VALUE) - (b.priority || Number.MAX_VALUE))
-    const rule = sorted.find(({
-                                  host,
-                                  path, referrer
-                              }) => {
+    const rule = storage.routeRules.find(({
+                                              host,
+                                              path, referrer
+                                          }) => {
         if (host) {
             if (typeof host === "string") {
                 if (host !== req.hostname) {
