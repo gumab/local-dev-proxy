@@ -3,8 +3,8 @@ name: Docker Image CI
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'server/**'
+    # paths:
+    #   - 'server/**'
   pull_request:
     branches: [ "main" ]
     paths:
@@ -14,7 +14,7 @@ jobs:
 
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: sre-runner
 
     steps:
       - uses: actions/checkout@v3
