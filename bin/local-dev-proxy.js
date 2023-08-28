@@ -37,7 +37,7 @@ async function main() {
   const currentPorts = await getCurrentPort();
 
   childProcess = wrapSpawn(command[0], command.slice(1),
-      {stdio: ['pipe', process.stdout, process.stderr]});
+      {stdio: 'inherit'});
 
   let count = 0;
   interval = setInterval(async () => {

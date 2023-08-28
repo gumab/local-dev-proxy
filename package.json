@@ -15,6 +15,9 @@
     "local-dev-proxy": "bin/local-dev-proxy.js",
     "ldprx": "bin/local-dev-proxy.js"
   },
+  "scripts": {
+    "patch-publish": "npm version patch && npm publish"
+  },
   "keywords": [],
   "author": "배창원",
   "license": "ISC",
