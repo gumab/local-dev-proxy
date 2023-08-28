@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "start:example": "ldprx node example.js"
+  },
+  "dependencies": {
+    "@thefarmersfront/local-dev-proxy": "file:..",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

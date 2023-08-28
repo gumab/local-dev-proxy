@@ -118,6 +118,18 @@ settingRouter.post('/register', (req: Request, res: Response) => {
     res.json({success: true});
 });
 
+settingRouter.post('/deregister', (req: Request, res: Response) => {
+
+    if (!req.body || !(req.body instanceof Array)) {
+        res.status(400).send('invalid input')
+        return
+    }
+    const data: string[] = req.body
+    storage.routeRules = storage.routeRules.filter(x => !data.includes(x.key))
+
+    res.json({success: true});
+});
+
 settingRouter.get('/rules', (req: Request, res: Response) => {
     res.json(storage.routeRules.map(x => ({
         ...x,
@@ -204,11 +216,11 @@ app.use((req: Request, res: Response) => {
     }
 });
 
-app.listen(httpPort, () => {
+const httpServer = app.listen(httpPort, () => {
     console.log('HTTP server listening on port ' + httpPort);
 });
 
-https.createServer({
+const httpsServer = https.createServer({
     key: fs.readFileSync('./keys/key.pem'),
     cert: fs.readFileSync('./keys/cert.pem'),
 }, app).listen(httpsPort, () => {

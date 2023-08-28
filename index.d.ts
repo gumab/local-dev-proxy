@@ -18,3 +18,5 @@ export interface LocalDevProxyOption {
 
 export function register(port: number, options: LocalDevProxyOption): void
 
+export function deregister(keys: string[]): void
+

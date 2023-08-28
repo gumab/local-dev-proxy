@@ -11,7 +11,9 @@ RUN npm install
 
 COPY . .
 
+RUN npm run build
+
 EXPOSE $HTTP_PORT
 EXPOSE $HTTPS_PORT
 
-ENTRYPOINT ["npm","start"]
+ENTRYPOINT ["node","dist/server.js"]

@@ -9,13 +9,11 @@
   },
   "version": "0.1.8",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "types": "index.d.ts",
   "bin": {
-    "local-dev-proxy": "bin/local-dev-proxy.js"
-  },
-  "scripts": {
-    "test": "NODE_ENV=development node test.js"
+    "local-dev-proxy": "bin/local-dev-proxy.js",
+    "ldprx": "bin/local-dev-proxy.js"
   },
   "keywords": [],
   "author": "배창원",

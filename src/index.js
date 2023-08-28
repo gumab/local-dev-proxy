@@ -30,6 +30,7 @@ async function healthCheck() {
 /**
  * @param port {number}
  * @param options {LocalDevProxyOption}
+ * @return {Promise<RouteRuleRequest[]>}
  */
 async function register(port, {rule, subRules = []}) {
   if (!await healthCheck()) {
@@ -48,23 +49,53 @@ async function register(port, {rule, subRules = []}) {
   }
 
   const target = `http://localhost:${port}`;
+  /**
+   * @type {RouteRuleRequest[]}
+   */
+  const request = [
+    ...(rule instanceof Array ? rule.map(x => ({
+      ...x,
+      target,
+    })) : [{...rule, target}]), ...subRules].map(packRequest);
+
   const res = await fetch('http://localhost/__setting/register', {
     method: 'post',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify([
-      ...(rule instanceof Array ? rule.map(x => ({
-        ...x,
-        target,
-      })) : [{...rule, target}]), ...subRules].map(packRequest)),
+    body: JSON.stringify(request),
   });
+
   if (res.status === 200) {
     const first = (rule instanceof Array ? rule[0] : rule);
     console.log(`[local-dev-proxy] 등록 완료 [${first.host} >> ${target}]`);
   } else {
     throw new Error(`[local-dev-proxy] 등록 실패 (${res.statusText})`);
   }
+  return request;
+}
+
+/**
+ * @param keys {string[]}
+ */
+async function deregister(keys) {
+  if (!await healthCheck()) {
+    return;
+  }
+  const res = await fetch('http://localhost/__setting/deregister', {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(keys),
+  });
+
+  if (res.status === 200) {
+    console.log(`[local-dev-proxy] 등록 해제 완료 (${keys.toString()})`);
+  } else {
+    throw new Error(`[local-dev-proxy] 등록 해제 실패 (${res.statusText})`);
+  }
 }
 
 module.exports.register = register;
+module.exports.deregister = deregister;
