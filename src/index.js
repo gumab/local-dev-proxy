@@ -76,9 +76,9 @@ async function register(port, {rule, subRules = []}) {
 }
 
 /**
- * @param keys {string[]}
+ * @param rules {{key:string;target:string}[]}
  */
-async function deregister(keys) {
+async function deregister(rules) {
   if (!await healthCheck()) {
     return;
   }
@@ -87,11 +87,12 @@ async function deregister(keys) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(keys),
+    body: JSON.stringify(rules),
   });
 
   if (res.status === 200) {
-    console.log(`[local-dev-proxy] 등록 해제 완료 (${keys.toString()})`);
+    console.log(
+        `[local-dev-proxy] 등록 해제 완료 (${rules.map(x => x.key).toString()})`);
   } else {
     throw new Error(`[local-dev-proxy] 등록 해제 실패 (${res.statusText})`);
   }

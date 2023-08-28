@@ -71,21 +71,20 @@ function getStringOrRegex(regexInput?: string, strInput?: string) {
 }
 
 function addRules(req: RouteRuleRequest[]) {
-    // 엎어칠수 없으면 문제가 되어서 일단 보류
-    // // 이미 로컬을 보고 있는게 있으면 엎어쓰지 않는다
-    // const filtered = req.filter(x =>
-    //     !storage.routeRules.some(y => y.key === x.key && /localhost|127\.0\.0\.1/.test(y.target)))
+    // 이미 로컬을 보고 있는게 있으면 엎어쓰지 않는다
+    const filtered = req.filter(x =>
+        !storage.routeRules.some(y => y.key === x.key && /localhost|127\.0\.0\.1/.test(y.target)))
 
     storage.routeRules = storage.routeRules
-        .filter(x => !req.some(y => y.key === x.key || y.target === x.target))
-        .concat(req.map(({
-                             host,
-                             hostRegex,
-                             path,
-                             pathRegex,
-                             referrerRegex,
-                             ...rest
-                         }) => ({
+        .filter(x => !filtered.some(y => y.key === x.key || y.target === x.target))
+        .concat(filtered.map(({
+                                  host,
+                                  hostRegex,
+                                  path,
+                                  pathRegex,
+                                  referrerRegex,
+                                  ...rest
+                              }) => ({
 
             ...rest,
             host: getStringOrRegex(hostRegex, host),
@@ -124,8 +123,8 @@ settingRouter.post('/deregister', (req: Request, res: Response) => {
         res.status(400).send('invalid input')
         return
     }
-    const data: string[] = req.body
-    storage.routeRules = storage.routeRules.filter(x => !data.includes(x.key))
+    const data: { key: string; target: string }[] = req.body
+    storage.routeRules = storage.routeRules.filter(x => !data.some(y => y.key === x.key && y.target === x.target))
 
     res.json({success: true});
 });

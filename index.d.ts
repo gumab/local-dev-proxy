@@ -1,4 +1,4 @@
-export interface LocalDevProxyRule {
+interface LocalDevProxyRule {
     key: string;
     priority?: number;
     path?: RegExp | string;
@@ -7,7 +7,7 @@ export interface LocalDevProxyRule {
     pathRewrite?: { [key: string]: string };
 }
 
-export interface LocalDevProxySubRule extends LocalDevProxyRule {
+interface LocalDevProxySubRule extends LocalDevProxyRule {
     target: string;
 }
 
@@ -18,5 +18,5 @@ export interface LocalDevProxyOption {
 
 export function register(port: number, options: LocalDevProxyOption): void
 
-export function deregister(keys: string[]): void
+export function deregister(rules: { key: string; taget: string }[]): void
 

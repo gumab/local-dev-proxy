@@ -46,7 +46,7 @@ async function main() {
     if (newPorts.length > 0) {
       registeredRules = await register(newPorts[0], config);
       clearInterval(interval);
-      return
+      return;
     }
     if (count++ >= 10) {
       console.log('[local-dev-proxy] 서버가 실행된 포트를 찾을 수 없습니다');
@@ -94,7 +94,8 @@ async function shutdown(signal, value) {
   }
 
   if (registeredRules.length > 0) {
-    await deregister(registeredRules.map(x => x.key));
+    await deregister(
+        registeredRules.map(x => ({key: x.key, target: x.target})));
   }
   process.exit(128 + value);
 }
