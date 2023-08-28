@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 const path = require('path');
 const {register, deregister} = require('..');
-const {wrapSpawn, execAsync} = require('../src/utils');
+const {wrapSpawn, execAsync, spawnAsync} = require('../src/utils');
+const findNewPort = require('../src/utils/findNewPort');
 
 function getConfig() {
   try {
@@ -28,31 +29,14 @@ async function getCurrentPort() {
   return [];
 }
 
-let interval;
-
 async function main() {
   /** @type {LocalDevProxyOption} */
   const config = getConfig();
   const command = process.argv.slice(2);
   const currentPorts = await getCurrentPort();
 
-  childProcess = wrapSpawn(command[0], command.slice(1),
-      {stdio: 'inherit'});
-
-  let count = 0;
-  interval = setInterval(async () => {
-    const newPorts = (await getCurrentPort()).filter(
-        x => !currentPorts.includes(x));
-    if (newPorts.length > 0) {
-      registeredRules = await register(newPorts[0], config);
-      clearInterval(interval);
-      return;
-    }
-    if (count++ >= 10) {
-      console.log('[local-dev-proxy] 서버가 실행된 포트를 찾을 수 없습니다');
-      clearInterval(interval);
-    }
-  }, 1000);
+  childProcess = wrapSpawn(command[0], command.slice(1), {stdio: 'inherit'});
+  registeredRules = await register(await findNewPort(currentPorts), config);
 }
 
 const signals = {
@@ -83,14 +67,10 @@ async function shutdown(signal, value) {
     return;
   }
   exited = true;
-  console.log('server stopped by ' + signal);
+  console.log('[local-dev-proxy] stopped by ' + signal);
 
   if (childProcess) {
     await kill(childProcess, signal).catch(console.error);
-  }
-  if (interval) {
-    clearInterval(interval);
-    interval = undefined;
   }
 
   if (registeredRules.length > 0) {
