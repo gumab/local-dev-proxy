@@ -7,7 +7,7 @@
   "publishConfig": {
     "@thefarmersfront:registry": "https://npm.pkg.github.com/"
   },
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "",
   "main": "src/index.js",
   "types": "index.d.ts",
