@@ -1,7 +1,7 @@
 const {spawnAsync, execAsync} = require('./utils');
 
 async function run() {
-  const ps = await execAsync('docker ps|grep 0.0.0.0:80').
+  const ps = await execAsync('docker ps|grep "0.0.0.0:80->"').
       then(({stdout}) => /^\w+/.exec(stdout)?.[0]).
       catch(() => undefined);
 
