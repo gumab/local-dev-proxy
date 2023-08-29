@@ -10,7 +10,7 @@ async function run() {
     await spawnAsync(`docker stop ${ps}`);
   }
   await spawnAsync('docker rm -f local-dev-proxy').catch(() => {
-    throw new Error('[local-dev-proxy] 도커 설치 후 이용해주세요.');
+    throw new Error('[local-dev-proxy] Docker Daemon 을 찾을 수 없습니다. 설치 혹은 실행 후 이용해주세요.');
   });
 
   console.log(`[local-dev-proxy] 도커 이미지를 실행합니다`);

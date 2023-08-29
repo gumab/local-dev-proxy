@@ -29,11 +29,11 @@ async function findNewPort(initialCurrentPorts, timeout) {
 
       if (added.length > 0) {
         /** @type {number} */
-        const rightPort = await added.reduce(async (result, port) => {
+        const appPort = added.reduce((result, port) => {
           if (result) {
             return result;
           }
-          const {directory} = await getProcessForPort(port);
+          const {directory} = getProcessForPort(port);
           if (!directory) { // 오류케이스
             return port;
           }
@@ -41,8 +41,8 @@ async function findNewPort(initialCurrentPorts, timeout) {
             return port;
           }
         }, undefined);
-        if (rightPort) {
-          resolve(rightPort);
+        if (appPort) {
+          resolve(appPort);
           clearInterval(interval);
           return;
         }

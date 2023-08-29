@@ -28,8 +28,14 @@ const spawnAsync = (file, args, options) => new Promise((resolve, reject) => {
     process.stdout.on('data', (data) => stdouts.push(data.toString()));
   }
   child.on('exit', (code, signal) => {
-    console.log('spwan exit', code, signal);
-    resolve(stdouts.join('\n'));
+    if (code) {
+      reject(new Error(
+          `child process exit(${code}${signal ?
+              ` - ${signal}` :
+              ''})\n${stdouts.join('\n')}`));
+    } else {
+      resolve(stdouts.join('\n'));
+    }
   });
 });
 
