@@ -5,9 +5,10 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "start:dev": "nodemon --watch '*.ts' --exec 'ts-node' server.ts",
+    "dev": "STORAGE=file concurrently \"npx tsc --watch\" \"nodemon -q index.js\"",
     "build": "tsc",
-    "build:docker": "docker build . -t registry.dev.kurlycorp.kr/local-dev-proxy/local-dev-proxy:latest"
+    "docker:build:test": "docker build . -t local-dev-proxy-test:latest",
+    "docker:run:test": "docker rm -f local-dev-proxy-test && docker run -d --name local-dev-proxy-test -p 8080:8080 local-dev-proxy-test:latest"
   },
   "keywords": [],
   "author": "배창원",
@@ -19,7 +20,8 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.17",
+    "concurrently": "^8.2.1",
     "nodemon": "^3.0.1",
-    "ts-node": "^10.9.1"
+    "typescript": "^5.2.2"
   }
 }
