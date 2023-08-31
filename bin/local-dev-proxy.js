@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const path = require('path');
 const {register, deregister} = require('..');
-const {wrapSpawn, execAsync, spawnAsync} = require('../src/utils');
+const {wrapSpawn, execAsync} = require('../src/utils');
 const findNewPort = require('../src/utils/findNewPort');
 
 function getConfig() {
@@ -49,9 +49,10 @@ async function kill(process, signal, timeout) {
   let isResolved = false;
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
+      isResolved = true;
       reject(new Error('Process kill timeout'));
     }, timeout || 10000);
-    process.on('exit', (...args) => {
+    process.once('exit', (...args) => {
       if (isResolved) {
         return;
       }
@@ -81,7 +82,7 @@ async function shutdown(signal, value) {
 }
 
 Object.keys(signals).forEach(function(signal) {
-  process.on(signal, function() {
+  process.once(signal, function() {
     void shutdown(signal, signals[signal]);
   });
 });

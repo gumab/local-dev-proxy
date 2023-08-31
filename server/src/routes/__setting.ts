@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
 import {RouteRuleRequest} from "../types";
 import {storage} from "../storage";
+import bodyParser from 'body-parser'
 
 const express = require('express');
 
@@ -24,7 +25,7 @@ function getStringOrRegex(regexInput?: string, strInput?: string) {
 
 
 const settingRouter = express.Router()
-
+settingRouter.use(bodyParser.json())
 
 function addRules(req: RouteRuleRequest[]) {
     // 이미 로컬을 보고 있는게 있으면 엎어쓰지 않는다

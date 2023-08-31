@@ -5,6 +5,7 @@ LABEL org.opencontainers.image.source='https://github.com/thefarmersfront/local-
 ENV LOCALHOST=host.docker.internal
 ENV HTTP_PORT=8080
 ENV HTTPS_PORT=8443
+ENV PROXY_SERVER=8090
 
 COPY package*.json ./
 RUN npm install
@@ -15,5 +16,6 @@ RUN npm run build
 
 EXPOSE $HTTP_PORT
 EXPOSE $HTTPS_PORT
+EXPOSE $PROXY_SERVER
 
 ENTRYPOINT ["node","dist/server.js"]

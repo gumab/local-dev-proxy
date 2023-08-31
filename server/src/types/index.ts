@@ -1,4 +1,4 @@
-export type RouteRule = {
+export interface RouteRule {
     key: string
     priority?: number
     path?: string | RegExp,
@@ -8,7 +8,13 @@ export type RouteRule = {
     target: string,
 }
 
-export type RouteRuleRequest = {
+export interface SavedRouteRule extends Omit<RouteRule, 'path' | 'host' | 'referrer'> {
+    path?: string,
+    host?: string,
+    referrer?: string,
+}
+
+export interface RouteRuleRequest {
     key: string
     priority?: number
     path?: string,

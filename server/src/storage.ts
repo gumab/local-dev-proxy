@@ -1,4 +1,4 @@
-import {RouteRule} from "./types";
+import {RouteRule, SavedRouteRule} from "./types";
 import fs from "fs";
 
 console.log(process.env.STORAGE)
@@ -28,12 +28,22 @@ class DefaultStorage implements Storage {
 
 class FileStorage implements Storage {
     setRules(rules: RouteRule[]) {
-        fs.writeFileSync('storage.json', JSON.stringify(rules, null, 2))
+        fs.writeFileSync('storage.json', JSON.stringify(rules.map<SavedRouteRule>(x => ({
+            ...x,
+            path: x.path?.toString(),
+            host: x.host?.toString(),
+            referrer: x.referrer?.toString()
+        })), null, 2))
     }
 
-    getRules() {
+    getRules(): RouteRule[] {
         try {
-            return JSON.parse(fs.readFileSync('storage.json').toString())
+            return (JSON.parse(fs.readFileSync('storage.json').toString()) as SavedRouteRule[]).map<RouteRule>(x => ({
+                ...x,
+                path: x.path && /^\/.+\/$/.test(x.path) ? eval(x.path) : x.path,
+                host: x.host && /^\/.+\/$/.test(x.host) ? eval(x.host) : x.host,
+                referrer: x.referrer && /^\/.+\/$/.test(x.referrer) ? eval(x.referrer) : x.referrer,
+            }))
         } catch (e) {
             return []
         }
