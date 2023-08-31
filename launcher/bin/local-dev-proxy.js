@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const path = require('path');
-const {register, deregister} = require('..');
+const {register, deregister} = require('../src');
 const {wrapSpawn, execAsync, spawnAsync} = require('../src/utils');
 const findNewPort = require('../src/utils/findNewPort');
 const prompts = require('prompts');

@@ -3,7 +3,7 @@
     "start:example": "ldprx node example.js"
   },
   "dependencies": {
-    "@thefarmersfront/local-dev-proxy": "file:..",
+    "@thefarmersfront/local-dev-proxy": "file:../launcher",
     "express": "^4.18.2"
   },
   "devDependencies": {
