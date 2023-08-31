@@ -4,11 +4,9 @@ import fs from "fs";
 import settingRouter from "./routes/__setting"
 import * as path from "path";
 import proxy from "./routes/proxy";
-import {ProxyGateway} from './proxy-gateway'
 
 const httpPort = Number(process.env.HTTP_PORT) || 80;
 const httpsPort = Number(process.env.HTTPS_PORT) || 443;
-const proxyPort = Number(process.env.PROXY_PORT) || 8090;
 
 const app = express();
 app.use('/__setting', settingRouter)
@@ -24,11 +22,6 @@ const httpsServer = https.createServer({
 }, app).listen(httpsPort, () => {
     console.log('HTTPS server listening on port ' + httpsPort);
 });
-
-const proxyGatewayServer = new ProxyGateway(httpPort, httpsPort).listen(proxyPort, () => {
-    console.log('Proxy Gateway listening on port ' + proxyPort);
-});
-
 
 const signals: { [key: string]: number } = {
     'SIGINT': 2, 'SIGTERM': 15,
@@ -52,7 +45,7 @@ async function shutdown(signal: string, value: number) {
             console.log('https server closed')
             resolve()
         })
-    ), proxyGatewayServer.closeAsync().then(() => console.log('proxy gateway closed'))])
+    )])
     console.log('[local-dev-proxy] all server closed ');
     process.exit(128 + value);
 }

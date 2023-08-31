@@ -12,10 +12,6 @@ function packRequest(input) {
     pathRegex: input.path && typeof input.path !== 'string' ?
         input.path.toString() :
         null,
-    host: input.host && typeof input.host === 'string' ? input.host : null,
-    hostRegex: input.host && typeof input.host !== 'string' ?
-        input.host.toString() :
-        null,
     referrerRegex: input.referrer ? input.referrer.toString() : null,
   };
 }

@@ -1,5 +1,5 @@
 import {Request, Response} from "express";
-import {RouteRuleRequest} from "../types";
+import {RouteRule, RouteRuleRequest} from "../types";
 import {storage} from "../storage";
 import bodyParser from 'body-parser'
 
@@ -27,21 +27,20 @@ function getStringOrRegex(regexInput?: string, strInput?: string) {
 const settingRouter = express.Router()
 settingRouter.use(bodyParser.json())
 
+const isLocalHost = (input: string) => /localhost|127\.0\.0\.1/.test(input)
+
 function addRules(req: RouteRuleRequest[]) {
     // 이미 로컬을 보고 있는게 있으면 엎어쓰지 않는다
+    // 새로 들어온것도 로컬이면 엎어쓴다
     const filtered = req.filter(x =>
-        !storage.getRules().some(y => y.key === x.key && /localhost|127\.0\.0\.1/.test(y.target))
-    ).map(({
-               host,
-               hostRegex,
-               path,
-               pathRegex,
-               referrerRegex,
-               ...rest
-           }) => ({
-
+        !storage.getRules().some(y => y.key === x.key && isLocalHost(y.target) && !isLocalHost(x.target))
+    ).map<RouteRule>(({
+                          path,
+                          pathRegex,
+                          referrerRegex,
+                          ...rest
+                      }) => ({
         ...rest,
-        host: getStringOrRegex(hostRegex, host),
         path: getStringOrRegex(pathRegex, path),
         referrer: getStringOrRegex(referrerRegex),
     }))
@@ -57,7 +56,7 @@ function checkRequest(body: RouteRuleRequest[] | RouteRuleRequest): boolean {
     if (body instanceof Array) {
         return body.length > 0 && body.every(checkRequest)
     } else if (body) {
-        return Boolean(body.key && (body.path || body.host || body.pathRegex || body.hostRegex || body.referrerRegex))
+        return Boolean(body.key && body.host && body.target)
     }
     return false
 }

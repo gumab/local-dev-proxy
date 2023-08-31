@@ -27,14 +27,8 @@ function makeProxyOption(req: Request): { target: string, ignorePath?: boolean, 
                                               path, referrer
                                           }) => {
         if (host) {
-            if (typeof host === "string") {
-                if (host !== req.hostname) {
-                    return false;
-                }
-            } else {
-                if (!host.test(req.hostname)) {
-                    return false;
-                }
+            if (host !== req.hostname) {
+                return false;
             }
         }
         if (path) {

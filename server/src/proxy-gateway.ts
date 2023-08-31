@@ -58,7 +58,7 @@ export class ProxyGateway {
             });
         });
 
-        server.addListener('connect', function (req, socket, bodyhead) {
+        server.on('connect', async (req, clientSocket, bodyhead) => {
             const {host, port} = getHostPortFromString(req.url || '', 443);
 
             const isLocalTarget = storage.getRules().some(x => x.host === host) && port === 443
@@ -66,26 +66,25 @@ export class ProxyGateway {
             const targetHost = isLocalTarget ? '127.0.0.1' : host || '';
             const targetPort = isLocalTarget ? httpsPort : port
 
-            const proxySocket = new net.Socket();
-            proxySocket.connect(targetPort, targetHost, function () {
-                    proxySocket.write(bodyhead);
-                    socket.write("HTTP/" + req.httpVersion + " 200 Connection established\r\n\r\n");
+            const serverSocket = net.connect(targetPort, targetHost, function () {
+                    serverSocket.write(bodyhead);
+                    clientSocket.write("HTTP/" + req.httpVersion + " 200 Connection established\r\n\r\n");
                 }
             ).on('data', function (chunk) {
-                socket.write(chunk);
+                clientSocket.write(chunk);
             }).on('end', function () {
-                socket.end();
+                clientSocket.end();
             }).on('error', function () {
-                socket.write("HTTP/" + req.httpVersion + " 500 Connection error\r\n\r\n");
-                socket.end();
+                clientSocket.write("HTTP/" + req.httpVersion + " 500 Connection error\r\n\r\n");
+                clientSocket.end();
             });
 
-            socket.on('data', function (chunk) {
-                proxySocket.write(chunk);
+            clientSocket.on('data', function (chunk) {
+                serverSocket.write(chunk);
             }).on('end', function () {
-                proxySocket.end();
+                serverSocket.end();
             }).on('error', function () {
-                proxySocket.end();
+                serverSocket.end();
             });
         });
         this.server = server

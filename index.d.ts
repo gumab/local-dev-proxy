@@ -1,8 +1,8 @@
 interface LocalDevProxyRule {
     key: string;
+    host: string;
     priority?: number;
     path?: RegExp | string;
-    host?: RegExp | string;
     referrer?: RegExp;
     pathRewrite?: { [key: string]: string };
 }

@@ -1,8 +1,6 @@
 import {RouteRule, SavedRouteRule} from "./types";
 import fs from "fs";
 
-console.log(process.env.STORAGE)
-
 interface Storage {
     setRules(rules: RouteRule[]): void
 
