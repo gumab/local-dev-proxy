@@ -1,0 +1,21 @@
+{
+  "name": "local-dev-proxy-workspace",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thefarmersfront/local-dev-proxy"
+  },
+  "publishConfig": {
+    "@thefarmersfront:registry": "https://npm.pkg.github.com/"
+  },
+  "scripts": {
+    "start:example": "npm start -w packages/example"
+  },
+  "keywords": [],
+  "author": "배창원",
+  "license": "ISC",
+  "workspaces": [
+    "packages/server",
+    "packages/launcher",
+    "packages/example"
+  ]
+}

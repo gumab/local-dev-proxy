@@ -4,11 +4,11 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'server/**'
+      - 'packages/server/**'
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'server/**'
+      - 'packages/server/**'
 
 jobs:
 
@@ -34,7 +34,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: server
+          context: packages/server
           push: true
           tags: registry.dev.kurlycorp.kr/local-dev-proxy/local-dev-proxy:latest
           platforms: |
