@@ -7,7 +7,7 @@
   "publishConfig": {
     "@thefarmersfront:registry": "https://npm.pkg.github.com/"
   },
-  "version": "0.2.6",
+  "version": "0.3.0",
   "main": "dist/index.ts",
   "types": "dist/index.d.ts",
   "bin": {
@@ -17,7 +17,8 @@
   "scripts": {
     "build": "tsc",
     "sample": "$npm_package_bin_ldprx config-samples/.ldprxrc.event-container.js echo sample",
-    "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish"
+    "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [],
   "author": "배창원",
