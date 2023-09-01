@@ -1,5 +1,5 @@
-const {run} = require('./docker-helper');
 const fetch = require('node-fetch');
+const { run } = require('./docker-helper');
 
 /**
  * @param input {LocalDevProxySubRule}
@@ -9,18 +9,15 @@ function packRequest(input) {
   return {
     ...input,
     path: input.path && typeof input.path === 'string' ? input.path : null,
-    pathRegex: input.path && typeof input.path !== 'string' ?
-        input.path.toString() :
-        null,
+    pathRegex: input.path && typeof input.path !== 'string' ? input.path.toString() : null,
     referrerRegex: input.referrer ? input.referrer.toString() : null,
   };
 }
 
 async function healthCheck() {
-  return await fetch('http://localhost/__setting/rules').
-      then((x) => x.status === 200).
-      catch(() => {
-      });
+  return fetch('http://localhost/__setting/rules')
+    .then((x) => x.status === 200)
+    .catch(() => {});
 }
 
 /**
@@ -28,15 +25,17 @@ async function healthCheck() {
  * @param options {LocalDevProxyOption}
  * @return {Promise<RouteRuleRequest[]>}
  */
-async function register(port, {rule, subRules = []}) {
-  if (!await healthCheck()) {
+async function register(port, { rule, subRules = [] }) {
+  if (!(await healthCheck())) {
     await run();
-    await (async function() {
+    await (async function () {
       let count = 0;
       while (count++ < 20) {
+        // eslint-disable-next-line no-await-in-loop
         if (await healthCheck()) {
           return;
         }
+        // eslint-disable-next-line no-await-in-loop
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
       throw new Error('[local-dev-proxy] 도커 서버의 상태를 확인해주세요');
@@ -49,10 +48,14 @@ async function register(port, {rule, subRules = []}) {
    * @type {RouteRuleRequest[]}
    */
   const request = [
-    ...(rule instanceof Array ? rule.map(x => ({
-      ...x,
-      target,
-    })) : [{...rule, target}]), ...subRules].map(packRequest);
+    ...(rule instanceof Array
+      ? rule.map((x) => ({
+          ...x,
+          target,
+        }))
+      : [{ ...rule, target }]),
+    ...subRules,
+  ].map(packRequest);
 
   const res = await fetch('http://localhost/__setting/register', {
     method: 'post',
@@ -63,7 +66,7 @@ async function register(port, {rule, subRules = []}) {
   });
 
   if (res.status === 200) {
-    const first = (rule instanceof Array ? rule[0] : rule);
+    const first = rule instanceof Array ? rule[0] : rule;
     console.log(`[local-dev-proxy] 등록 완료 [${first.host} >> ${target}]`);
   } else {
     throw new Error(`[local-dev-proxy] 등록 실패 (${res.statusText})`);
@@ -75,7 +78,7 @@ async function register(port, {rule, subRules = []}) {
  * @param rules {{key:string;target:string}[]}
  */
 async function deregister(rules) {
-  if (!await healthCheck()) {
+  if (!(await healthCheck())) {
     return;
   }
   const res = await fetch('http://localhost/__setting/deregister', {
@@ -87,8 +90,7 @@ async function deregister(rules) {
   });
 
   if (res.status === 200) {
-    console.log(
-        `[local-dev-proxy] 등록 해제 완료 (${rules.map(x => x.key).toString()})`);
+    console.log(`[local-dev-proxy] 등록 해제 완료 (${rules.map((x) => x.key).toString()})`);
   } else {
     throw new Error(`[local-dev-proxy] 등록 해제 실패 (${res.statusText})`);
   }

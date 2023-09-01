@@ -7,9 +7,6 @@
     "@thefarmersfront/local-dev-proxy": "file:../packages/launcher",
     "express": "^4.18.2"
   },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
   "version": "1.0.0",
   "main": "example.js",
   "author": "배창원",

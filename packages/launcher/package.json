@@ -9,7 +9,7 @@
   },
   "version": "0.2.6",
   "main": "src/index.js",
-  "types": "index.d.ts",
+  "types": "@types/index.d.ts",
   "bin": {
     "local-dev-proxy": "src/bin/local-dev-proxy.js",
     "ldprx": "src/bin/local-dev-proxy.js"

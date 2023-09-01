@@ -1,13 +1,12 @@
 const getProcessForPort = require('./getProcessForPort');
-const {execAsync} = require('./index');
+const { execAsync } = require('./index');
 
 async function getCurrentPort() {
-  const stdout = await execAsync('lsof -i -n -P|grep "node.*LISTEN"').
-      then(x => x.stdout).
-      catch(() => undefined);
+  const stdout = await execAsync('lsof -i -n -P|grep "node.*LISTEN"')
+    .then((x) => x.stdout)
+    .catch(() => undefined);
   if (stdout) {
-    return stdout.match(/TCP \*:(\d+)/g).
-        map(x => Number(x.replace(/[^\d]/g, '')));
+    return stdout.match(/TCP \*:(\d+)/g).map((x) => Number(x.replace(/[^\d]/g, '')));
   }
   return [];
 }
@@ -24,7 +23,7 @@ async function findNewPort(initialCurrentPorts, timeout) {
     const interval = setInterval(async () => {
       const newPorts = await getCurrentPort();
 
-      const added = newPorts.filter(x => !currentPorts.includes(x));
+      const added = newPorts.filter((x) => !currentPorts.includes(x));
       currentPorts = newPorts;
 
       if (added.length > 0) {
@@ -33,13 +32,15 @@ async function findNewPort(initialCurrentPorts, timeout) {
           if (result) {
             return result;
           }
-          const {directory} = getProcessForPort(port);
-          if (!directory) { // 오류케이스
+          const { directory } = getProcessForPort(port);
+          if (!directory) {
+            // 오류케이스
             return port;
           }
           if (directory && directory.startsWith(process.cwd())) {
             return port;
           }
+          return undefined;
         }, undefined);
         if (appPort) {
           resolve(appPort);
