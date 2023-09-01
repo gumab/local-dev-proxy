@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import path from 'path';
 import prompts from 'prompts';
-import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule } from '../types';
-import { execAsync, wrapSpawn } from '../utils';
 import { ChildProcess } from 'child_process';
-import { RouteRuleRequest } from '@shared/types';
+import { RouteRuleRequest } from 'shared/@types';
+import { execAsync, wrapSpawn } from '../utils';
 import { findNewPort, getCurrentPort } from '../utils/port-finder';
 import { deregister, register } from '../index';
+import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule } from '../types';
 
 function getConfig(fileName?: string) {
   try {

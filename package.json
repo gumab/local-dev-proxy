@@ -12,7 +12,8 @@
   "license": "ISC",
   "workspaces": [
     "packages/server",
-    "packages/launcher"
+    "packages/launcher",
+    "packages/shared"
   ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.5.0",

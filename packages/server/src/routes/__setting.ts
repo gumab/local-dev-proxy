@@ -1,11 +1,12 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { RouteRule, RouteRuleRequest } from '../types';
+import { RouteRuleRequest } from 'shared/@types';
+import { RouteRule } from '../types';
 import { storage } from '../storage';
 
-function getStringOrRegex(regexInput?: string): RegExp | undefined;
-function getStringOrRegex(regexInput?: string, strInput?: string): RegExp | string | undefined;
-function getStringOrRegex(regexInput?: string, strInput?: string) {
+function getStringOrRegex(regexInput?: string | null): RegExp | undefined;
+function getStringOrRegex(regexInput?: string | null, strInput?: string | null): RegExp | string | undefined;
+function getStringOrRegex(regexInput?: string | null, strInput?: string | null) {
   if (regexInput) {
     try {
       // eslint-disable-next-line no-eval

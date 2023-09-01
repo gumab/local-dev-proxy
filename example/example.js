@@ -11,7 +11,7 @@ async function main() {
   });
 
   app.listen(httpPort, () => {
-    console.log('HTTP server listening on port ' + httpPort);
+    console.log(`HTTP server listening on port ${httpPort}`);
   });
 }
 

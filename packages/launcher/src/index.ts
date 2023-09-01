@@ -1,9 +1,9 @@
 import fetch from 'node-fetch';
-import { RouteRuleRequest } from '@shared/types';
+import { RouteRuleRequest } from 'shared/@types';
 import { run } from './docker-helper';
 import { LocalDevProxyOption, LocalDevProxySubRule } from './types';
 
-export { LocalDevProxyOption } from './types';
+export type { LocalDevProxyOption };
 
 function packRequest(input: LocalDevProxySubRule): RouteRuleRequest {
   return {

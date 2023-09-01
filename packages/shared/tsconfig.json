@@ -3,9 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "baseUrl": "src",
-    "declaration": true
-  },
-  "include": [
-    "src/**/*.ts"
-  ]
+    "declaration": true,
+    "typeRoots": [
+      "@types"
+    ]
+  }
 }

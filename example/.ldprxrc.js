@@ -1,4 +1,4 @@
-/** @type {import('launcher').LocalDevProxyOption} */
+/** @type {import('@thefarmersfront/local-dev-proxy').LocalDevProxyOption} */
 module.exports = {
   rule: {
     key: 'example-app',
