@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { RouteRuleRequest } from 'shared/@types';
-import { RouteRule } from '../types';
+import { RouteRule, RouteRuleRequest } from '../types';
 import { storage } from '../storage';
 
 function getStringOrRegex(regexInput?: string | null): RegExp | undefined;

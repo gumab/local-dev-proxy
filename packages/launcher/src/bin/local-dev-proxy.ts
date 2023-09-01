@@ -2,11 +2,10 @@
 import path from 'path';
 import prompts from 'prompts';
 import { ChildProcess, execSync } from 'child_process';
-import { RouteRuleRequest } from 'shared/@types';
 import { execAsync, wrapSpawn } from '../utils';
 import { findNewPort, getCurrentPort } from '../utils/port-finder';
 import { deregister, register } from '../index';
-import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule } from '../types';
+import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule, RouteRuleRequest } from '../types';
 import { waitForDockerRunning } from '../docker-helper';
 
 function getConfig(fileName?: string) {

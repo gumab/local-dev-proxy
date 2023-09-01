@@ -1,7 +1,6 @@
 import fetch from 'node-fetch';
-import { RouteRuleRequest } from 'shared/@types';
 import { healthCheck, waitForDockerRunning } from './docker-helper';
-import { LocalDevProxyOption, LocalDevProxySubRule } from './types';
+import { LocalDevProxyOption, LocalDevProxySubRule, RouteRuleRequest } from './types';
 
 export type { LocalDevProxyOption };
 

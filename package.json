@@ -8,17 +8,10 @@
     "@thefarmersfront:registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "server:docker:build:test": "docker build . -f Dockerfile.server -t local-dev-proxy-test:latest",
-    "server:docker:run:test": "docker rm -f local-dev-proxy-test && docker run -d --name local-dev-proxy-test -p 8080:8080 local-dev-proxy-test:latest"
   },
   "keywords": [],
   "author": "배창원",
   "license": "ISC",
-  "workspaces": [
-    "packages/server",
-    "packages/launcher",
-    "packages/shared"
-  ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "@typescript-eslint/parser": "^6.5.0",
