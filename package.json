@@ -7,15 +7,11 @@
   "publishConfig": {
     "@thefarmersfront:registry": "https://npm.pkg.github.com/"
   },
-  "scripts": {
-    "start:example": "npm start -w packages/example"
-  },
   "keywords": [],
   "author": "배창원",
   "license": "ISC",
   "workspaces": [
     "packages/server",
-    "packages/launcher",
-    "packages/example"
+    "packages/launcher"
   ]
 }

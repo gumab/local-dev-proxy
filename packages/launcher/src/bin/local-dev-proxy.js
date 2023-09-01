@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 const path = require('path');
-const {register, deregister} = require('../src');
-const {wrapSpawn, execAsync, spawnAsync} = require('../src/utils');
-const findNewPort = require('../src/utils/findNewPort');
+const {register, deregister} = require('../index');
+const {wrapSpawn, execAsync, spawnAsync} = require('../utils');
+const findNewPort = require('../utils/findNewPort');
 const prompts = require('prompts');
 
-function getConfig() {
+function getConfig(fileName) {
   try {
-    return require(path.join(process.cwd(), '.ldprxrc.js'));
+    return require(path.join(process.cwd(), fileName || '.ldprxrc.js'));
   } catch (e) {
     throw new Error('[local-dev-proxy] .ldprxrc.js 파일이 필요합니다');
   }
@@ -88,10 +88,27 @@ async function checkHostDns(host) {
   }
 }
 
+/**
+ * @return {{config: LocalDevProxyOption, command: string[]}}
+ */
+function parseArgv() {
+  const argv = process.argv.slice(2);
+
+  if (/\.ldprxrc.*\.js$/.test(argv[0])) {
+    return {
+      config: getConfig(argv[0]),
+      command: argv.slice(1),
+    };
+  }
+
+  return {
+    config: getConfig(),
+    command: argv,
+  };
+}
+
 async function main() {
-  /** @type {LocalDevProxyOption} */
-  const config = getConfig();
-  const command = process.argv.slice(2);
+  const {command, config} = parseArgv();
   const currentPorts = await getCurrentPort();
 
   const host = validateConfig(config);

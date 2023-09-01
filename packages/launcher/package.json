@@ -11,10 +11,11 @@
   "main": "src/index.js",
   "types": "index.d.ts",
   "bin": {
-    "local-dev-proxy": "bin/local-dev-proxy.js",
-    "ldprx": "bin/local-dev-proxy.js"
+    "local-dev-proxy": "src/bin/local-dev-proxy.js",
+    "ldprx": "src/bin/local-dev-proxy.js"
   },
   "scripts": {
+    "sample": "$npm_package_bin_ldprx config-samples/.ldprxrc.event-container.js echo sample",
     "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish"
   },
   "keywords": [],

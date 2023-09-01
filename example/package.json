@@ -1,10 +1,10 @@
 {
   "name": "local-dev-proxy-example",
   "scripts": {
-    "start": "ldprx node example.js"
+    "start:example": "ldprx node example.js"
   },
   "dependencies": {
-    "@thefarmersfront/local-dev-proxy": "file:../launcher",
+    "@thefarmersfront/local-dev-proxy": "file:../packages/launcher",
     "express": "^4.18.2"
   },
   "devDependencies": {
