@@ -1,15 +1,19 @@
 {
   "name": "local-dev-proxy-example",
   "scripts": {
-    "start:example": "ldprx node example.js"
-  },
-  "dependencies": {
-    "@thefarmersfront/local-dev-proxy": "file:../packages/launcher",
-    "express": "^4.18.2"
+    "start:example": "ldprx node example.js",
+    "start:example:nodemon": "ldprx nodemon example.js"
   },
   "version": "1.0.0",
   "main": "example.js",
   "author": "배창원",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@thefarmersfront/local-dev-proxy": "file:../packages/launcher",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
 }

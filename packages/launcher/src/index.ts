@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { RouteRuleRequest } from 'shared/@types';
-import { run } from './docker-helper';
+import { healthCheck, waitForDockerRunning } from './docker-helper';
 import { LocalDevProxyOption, LocalDevProxySubRule } from './types';
 
 export type { LocalDevProxyOption };
@@ -14,29 +14,8 @@ function packRequest(input: LocalDevProxySubRule): RouteRuleRequest {
   };
 }
 
-async function healthCheck() {
-  return fetch('http://localhost/__setting/rules')
-    .then((x) => x.status === 200)
-    .catch(() => {});
-}
-
 export async function register(port: number, { rule, subRules = [] }: LocalDevProxyOption) {
-  if (!(await healthCheck())) {
-    await run();
-    await (async function () {
-      let count = 0;
-      while (count++ < 20) {
-        // eslint-disable-next-line no-await-in-loop
-        if (await healthCheck()) {
-          return;
-        }
-        // eslint-disable-next-line no-await-in-loop
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-      throw new Error('[local-dev-proxy] 도커 서버의 상태를 확인해주세요');
-    })();
-    // throw new Error('proxy server is not running');
-  }
+  await waitForDockerRunning();
 
   const target = `http://localhost:${port}`;
 

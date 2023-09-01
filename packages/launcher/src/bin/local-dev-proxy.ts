@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import path from 'path';
 import prompts from 'prompts';
-import { ChildProcess } from 'child_process';
+import { ChildProcess, execSync } from 'child_process';
 import { RouteRuleRequest } from 'shared/@types';
 import { execAsync, wrapSpawn } from '../utils';
 import { findNewPort, getCurrentPort } from '../utils/port-finder';
 import { deregister, register } from '../index';
 import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule } from '../types';
+import { waitForDockerRunning } from '../docker-helper';
 
 function getConfig(fileName?: string) {
   try {
@@ -42,7 +43,9 @@ let registeredRules: RouteRuleRequest[] = [];
 let childProcess: ChildProcess | undefined;
 
 async function checkHostDns(host: string) {
-  const isRegistered = !!(await execAsync(`cat "/etc/hosts"|grep "127\\.0\\.0\\.1\\s*${host}"`).catch(() => undefined));
+  const isRegistered = !!(await execAsync(`cat "/etc/hosts"|grep "127\\.0\\.0\\.1\\s*${host}"`)
+    .then((x) => x.stdout)
+    .catch(() => undefined));
   if (!isRegistered) {
     const { registerHost } = await prompts({
       type: 'confirm',
@@ -63,7 +66,7 @@ async function checkHostDns(host: string) {
       }
 
       process.stdout.write('맥 패스워드를 입력하세요\n');
-      await execAsync(`echo "127.0.0.1\t${host}" | sudo tee -a /etc/hosts`);
+      execSync(`echo "127.0.0.1\t${host}" | sudo tee -a /etc/hosts`);
       console.log('/etc/hosts 파일이 변경되었습니다.');
     }
   }
@@ -98,8 +101,12 @@ async function main() {
   }
   await checkHostDns(host);
 
+  await waitForDockerRunning();
+
   childProcess = wrapSpawn(command[0], command.slice(1), { stdio: 'inherit' });
   registeredRules = await register(await findNewPort(currentPorts), config);
+
+  execSync(`open http://${host}`);
 }
 
 const signals: { [key: string]: number } = {
