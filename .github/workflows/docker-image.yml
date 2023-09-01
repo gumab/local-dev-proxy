@@ -5,12 +5,10 @@ on:
     branches: [ "main" ]
     paths:
       - 'packages/server/**'
-      - 'tsconfig.json'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'packages/server/**'
-      - 'tsconfig.json'
 
 jobs:
 
@@ -36,7 +34,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          file: Dockerfile.server
+          context: packages/server
           push: true
           tags: registry.dev.kurlycorp.kr/local-dev-proxy/local-dev-proxy:latest
           platforms: |

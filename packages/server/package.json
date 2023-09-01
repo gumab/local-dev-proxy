@@ -5,10 +5,8 @@
   "scripts": {
     "start": "node dist/server.js",
     "startwithbuild": "npm run build && node dist/server.js",
-    "merge-tsconfig": "json-merger ../../tsconfig.json tsconfig.json > tsconfig.docker.json",
     "dev": "STORAGE=file concurrently \"npx tsc --watch\" \"nodemon -q index.js\"",
     "build": "tsc",
-    "build:docker": "tsc -p tsconfig.docker.json",
     "docker:build:test": "docker build . -t local-dev-proxy-test:latest",
     "docker:run:test": "docker rm -f local-dev-proxy-test && docker run -d --name local-dev-proxy-test -p 8080:8080 local-dev-proxy-test:latest"
   },
@@ -24,7 +22,6 @@
     "@types/express": "^4.17.17",
     "@types/http-proxy": "^1.17.11",
     "concurrently": "^8.2.1",
-    "json-merger": "^1.1.10",
     "nodemon": "^3.0.1",
     "typescript": "^5.2.2"
   },

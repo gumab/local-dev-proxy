@@ -12,7 +12,6 @@ RUN npm install
 
 COPY . .
 
-#RUN npm run merge-tsconfig
 RUN npm run build
 
 EXPOSE $HTTP_PORT
