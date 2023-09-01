@@ -7,6 +7,10 @@
   "publishConfig": {
     "@thefarmersfront:registry": "https://npm.pkg.github.com/"
   },
+  "scripts": {
+    "server:docker:build:test": "docker build . -f Dockerfile.server -t local-dev-proxy-test:latest",
+    "server:docker:run:test": "docker rm -f local-dev-proxy-test && docker run -d --name local-dev-proxy-test -p 8080:8080 local-dev-proxy-test:latest"
+  },
   "keywords": [],
   "author": "배창원",
   "license": "ISC",

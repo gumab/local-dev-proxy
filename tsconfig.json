@@ -18,7 +18,6 @@
       "afterDeclarations": true
     }
   ],
-
   "exclude": [
     "node_modules"
   ]
