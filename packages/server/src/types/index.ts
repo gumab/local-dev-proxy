@@ -7,14 +7,3 @@ export interface RouteRule {
   pathRewrite?: { [key: string]: string };
   target: string;
 }
-
-export interface RouteRuleRequest {
-  key: string;
-  priority?: number;
-  path?: string;
-  pathRegex?: string;
-  host: string;
-  referrerRegex?: string;
-  pathRewrite?: { [key: string]: string };
-  target: string;
-}

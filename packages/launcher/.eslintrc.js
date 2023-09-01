@@ -1,3 +1,7 @@
 module.exports = {
-  ignorePatterns: ['@types/**/*'],
+  ignorePatterns: ['dist/**/*', '.eslintrc.js'],
+  parserOptions: {
+    project: './tsconfig.json',
+    tsconfigRootDir: __dirname,
+  },
 };

@@ -8,11 +8,11 @@
     "@thefarmersfront:registry": "https://npm.pkg.github.com/"
   },
   "version": "0.2.6",
-  "main": "src/index.js",
+  "main": "src/index.ts",
   "types": "@types/index.d.ts",
   "bin": {
-    "local-dev-proxy": "src/bin/local-dev-proxy.js",
-    "ldprx": "src/bin/local-dev-proxy.js"
+    "local-dev-proxy": "src/bin/local-dev-proxy.ts",
+    "ldprx": "src/bin/local-dev-proxy.ts"
   },
   "scripts": {
     "sample": "$npm_package_bin_ldprx config-samples/.ldprxrc.event-container.js echo sample",
@@ -23,13 +23,15 @@
   "license": "ISC",
   "dependencies": {
     "arg": "^5.0.2",
-    "node-fetch": "^2.7.0",
+    "node-fetch": "^3.3.2",
     "prompts": "^2.4.2"
   },
   "bugs": {
     "url": "https://github.com/thefarmersfront/local-dev-proxy/issues"
   },
   "homepage": "https://github.com/thefarmersfront/local-dev-proxy#readme",
-  "devDependencies": {},
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "@types/prompts": "^2.4.4"
+  }
 }

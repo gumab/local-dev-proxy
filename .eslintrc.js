@@ -14,6 +14,7 @@ module.exports = {
       node: {
         extensions: ['.js', '.ts'],
       },
+      typescript: {},
     },
   },
   rules: {
@@ -44,4 +45,16 @@ module.exports = {
     'no-void': 'off',
     'prefer-destructuring': 'off',
   },
+  overrides: [
+    {
+      files: ['**/*.ts'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 12,
+        sourceType: 'script',
+      },
+      extends: ['plugin:@typescript-eslint/recommended'],
+      plugins: ['@typescript-eslint'],
+    },
+  ],
 };
