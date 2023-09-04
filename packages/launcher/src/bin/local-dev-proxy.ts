@@ -103,15 +103,14 @@ async function main() {
   await waitForDockerRunning();
 
   childProcess = wrapSpawn(command[0], command.slice(1), { stdio: 'inherit' });
+  childProcess.on('exit', (code, signal) => {
+    childProcess = undefined;
+    shutdown(signal || 'Child Process Exit', code || 0);
+  });
   registeredRules = await register(await findNewPort(currentPorts), config);
 
   execSync(`open http://${host}`);
 }
-
-const signals: { [key: string]: number } = {
-  SIGINT: 2,
-  SIGTERM: 15,
-};
 
 let exited = false;
 
@@ -130,6 +129,7 @@ async function kill(
       reject(new Error('Process kill timeout'));
     }, timeout || 10000);
     process.once('exit', (code, signal) => {
+      childProcess = undefined;
       if (isResolved) {
         return;
       }
@@ -157,12 +157,17 @@ async function shutdown(signal: string, value: number) {
   if (registeredRules.length > 0) {
     await deregister(registeredRules.map((x) => ({ key: x.key, target: x.target })));
   }
-  process.exit(128 + value);
+  process.exit(value);
 }
+
+const signals: { [key: string]: number } = {
+  SIGINT: 2,
+  SIGTERM: 15,
+};
 
 Object.keys(signals).forEach((signal) => {
   process.once(signal, () => {
-    void shutdown(signal, signals[signal]);
+    void shutdown(signal, 128 + signals[signal]);
   });
 });
 

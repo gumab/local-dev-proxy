@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "sample": "$npm_package_bin_ldprx config-samples/.ldprxrc.event-container.js echo sample",
+    "dev": "ts-node src/bin/local-dev-proxy.ts config-samples/.ldprxrc.event-container.js echo test",
     "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish",
     "prepublishOnly": "npm run build"
   },
@@ -36,6 +36,7 @@
   "devDependencies": {
     "@types/node-fetch": "^2.6.4",
     "@types/prompts": "^2.4.4",
+    "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }
 }
