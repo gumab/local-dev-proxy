@@ -1,0 +1,21 @@
+[
+  "kurly.com",
+  "*.kurly.com",
+  "*.local.kurly.com",
+  "*.dev.kurly.com",
+  "*.stg.kurly.com",
+  "*.perf.kurly.com",
+  "kurlycorp.kr",
+  "*.kurlycorp.kr",
+  "*.local.kurlycorp.kr",
+  "*.dev.kurlycorp.kr",
+  "*.stg.kurlycorp.kr",
+  "*.perf.kurlycorp.kr",
+  "kurly.services",
+  "*.kurly.services",
+  "*.local.kurly.services",
+  "*.dev.kurly.services",
+  "*.stg.kurly.services",
+  "*.perf.kurly.services",
+  "localhost"
+]

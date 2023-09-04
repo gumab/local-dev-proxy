@@ -8,6 +8,7 @@
     "@thefarmersfront:registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
+    "set-usable-hosts": "node scripts/set-usable-hosts.js"
   },
   "keywords": [],
   "author": "배창원",

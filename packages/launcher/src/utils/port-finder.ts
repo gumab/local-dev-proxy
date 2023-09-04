@@ -48,7 +48,7 @@ export async function findNewPort(initialCurrentPorts: number[], timeout?: numbe
       }
 
       if (timeout && Date.now() - startTime > timeout) {
-        reject(new Error('[local-dev-proxy] 서버가 실행된 포트를 찾을 수 없습니다.'));
+        reject(new Error('서버가 실행된 포트를 찾을 수 없습니다.'));
       }
     }, 1000);
   });

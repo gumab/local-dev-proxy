@@ -1,19 +1,21 @@
 import fetch from 'node-fetch';
 import { healthCheck, waitForDockerRunning } from './docker-helper';
 import { LocalDevProxyOption, LocalDevProxySubRule, RouteRuleRequest } from './types';
+import { logger } from './utils/logger';
 
 export type { LocalDevProxyOption };
 
-function packRequest(input: LocalDevProxySubRule): RouteRuleRequest {
+function packRequest(input: LocalDevProxySubRule, https?: boolean): RouteRuleRequest {
   return {
     ...input,
+    https: https ?? false,
     path: input.path && typeof input.path === 'string' ? input.path : null,
     pathRegex: input.path && typeof input.path !== 'string' ? input.path.toString() : null,
     referrerRegex: input.referrer ? input.referrer.toString() : null,
   };
 }
 
-export async function register(port: number, { rule, subRules = [] }: LocalDevProxyOption) {
+export async function register(port: number, { https, rule, subRules = [] }: LocalDevProxyOption) {
   await waitForDockerRunning();
 
   const target = `http://localhost:${port}`;
@@ -29,7 +31,7 @@ export async function register(port: number, { rule, subRules = [] }: LocalDevPr
         }))
       : [{ ...rule, target }]),
     ...subRules,
-  ].map(packRequest);
+  ].map((x) => packRequest(x, https));
 
   const res = await fetch('http://localhost/__setting/register', {
     method: 'post',
@@ -41,9 +43,13 @@ export async function register(port: number, { rule, subRules = [] }: LocalDevPr
 
   if (res.status === 200) {
     const first = rule instanceof Array ? rule[0] : rule;
-    console.log(`[local-dev-proxy] 등록 완료 [${first.host} >> ${target}]`);
+    if (https) {
+      logger.log(`등록 완료 [https://${first.host}, http://${first.host} >> ${target}]`);
+    } else {
+      logger.log(`등록 완료 [http://${first.host} >> ${target}]`);
+    }
   } else {
-    throw new Error(`[local-dev-proxy] 등록 실패 (${res.statusText})`);
+    throw new Error(`등록 실패 (${res.statusText})`);
   }
   return request;
 }
@@ -61,8 +67,8 @@ export async function deregister(rules: { key: string; target: string }[]) {
   });
 
   if (res.status === 200) {
-    console.log(`[local-dev-proxy] 등록 해제 완료 (${rules.map((x) => x.key).toString()})`);
+    logger.log(`등록 해제 완료 (${rules.map((x) => x.key).toString()})`);
   } else {
-    throw new Error(`[local-dev-proxy] 등록 해제 실패 (${res.statusText})`);
+    throw new Error(`등록 해제 실패 (${res.statusText})`);
   }
 }

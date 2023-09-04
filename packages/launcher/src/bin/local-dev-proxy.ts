@@ -1,174 +1,86 @@
 #!/usr/bin/env node
 import path from 'path';
-import prompts from 'prompts';
-import { ChildProcess, execSync } from 'child_process';
-import { execAsync, wrapSpawn } from '../utils';
-import { findNewPort, getCurrentPort } from '../utils/port-finder';
-import { deregister, register } from '../index';
-import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule, RouteRuleRequest } from '../types';
-import { waitForDockerRunning } from '../docker-helper';
+import { watchFile, unwatchFile } from 'fs';
+import { LocalDevProxyOption } from '../types';
+import { logger } from '../utils/logger';
+import ProcessRunner from '../ProcessRunner';
 
-function getConfig(fileName?: string) {
+function getConfig(configPath: string): LocalDevProxyOption {
   try {
+    delete require.cache[configPath];
     // eslint-disable-next-line import/no-dynamic-require,global-require
-    return require(path.join(process.cwd(), fileName || '.ldprxrc.js'));
+    return require(configPath);
   } catch (e) {
-    throw new Error('[local-dev-proxy] .ldprxrc.js 파일이 필요합니다');
+    throw new Error('.ldprxrc.js 파일이 필요합니다');
   }
 }
 
-function validateRule(rule: LocalDevProxyRule | LocalDevProxySubRule, isSubRule?: boolean) {
-  if (rule.key && rule.host && (!isSubRule || (rule as LocalDevProxySubRule).target)) {
-    return rule.host;
-  } else {
-    return false;
-  }
-}
-
-function validateConfig(config: LocalDevProxyOption): string | false {
-  if (config.subRules) {
-    if (!config.subRules.every((subRule) => validateRule(subRule, true))) {
-      return false;
-    }
-  }
-  if (config.rule instanceof Array) {
-    return validateRule(config.rule[0]);
-  } else {
-    return validateRule(config.rule);
-  }
-}
-
-let registeredRules: RouteRuleRequest[] = [];
-let childProcess: ChildProcess | undefined;
-
-async function checkHostDns(host: string) {
-  const isRegistered = !!(await execAsync(`cat "/etc/hosts"|grep "127\\.0\\.0\\.1\\s*${host}"`)
-    .then((x) => x.stdout)
-    .catch(() => undefined));
-  if (!isRegistered) {
-    const { registerHost } = await prompts({
-      type: 'confirm',
-      name: 'registerHost',
-      message: `[local-dev-proxy] Host가 등록되지 않았습니다.\n127.0.0.1\t${host}\n항목을 /etc/hosts 파일에 추가하시겠습니까?`,
-      initial: true,
-    });
-    if (registerHost) {
-      const existHost = await execAsync(`cat "/etc/hosts"|grep ${host}`)
-        .then((x) => x.stdout)
-        .catch(() => undefined);
-      if (existHost) {
-        throw new Error(
-          `${host} 은(는) 이미 다른 IP(${existHost.match(
-            /[\d.]+/,
-          )?.[0]})로 등록되어있습니다. 확인 후 다시 이용해주세요`,
-        );
-      }
-
-      process.stdout.write('맥 패스워드를 입력하세요\n');
-      execSync(`echo "127.0.0.1\t${host}" | sudo tee -a /etc/hosts`);
-      console.log('/etc/hosts 파일이 변경되었습니다.');
-    }
-  }
-}
-
-/**
- * @return {{config: LocalDevProxyOption, command: string[]}}
- */
-function parseArgv() {
+function parseArgv(): {
+  configPath: string;
+  command: string[];
+} {
   const argv = process.argv.slice(2);
 
   if (/\.ldprxrc.*\.js$/.test(argv[0])) {
     return {
-      config: getConfig(argv[0]),
+      configPath: path.join(process.cwd(), argv[0]),
       command: argv.slice(1),
     };
   }
 
   return {
-    config: getConfig(),
+    configPath: path.join(process.cwd(), '.ldprxrc.js'),
     command: argv,
   };
 }
 
-async function main() {
-  const { command, config } = parseArgv();
-  const currentPorts = await getCurrentPort();
+function main() {
+  const runner = new ProcessRunner();
+  const { command, configPath } = parseArgv();
+  const config = getConfig(configPath);
 
-  const host = validateConfig(config);
-  if (!host) {
-    throw new Error(`[local-dev-proxy] .ldprxrc.js 설정이 유효하지 않습니다.`);
-  }
-  await checkHostDns(host);
+  const configFileWatchListner = async () => {
+    logger.log('config 파일에 변경이 감지되었습니다. 프로세스를 다시 시작합니다', 'blueBright');
+    await runner.kill(2);
+    void runner.run(command, getConfig(configPath)).catch((e) => {
+      if (e instanceof Error) {
+        logger.error(e);
+      }
+    });
+  };
 
-  await waitForDockerRunning();
+  watchFile(configPath, configFileWatchListner);
+  // runner.onExit = () => {
+  //   unwatchFile(configPath, configFileWatchListner);
+  // };
 
-  childProcess = wrapSpawn(command[0], command.slice(1), { stdio: 'inherit' });
-  childProcess.on('exit', (code, signal) => {
-    childProcess = undefined;
-    shutdown(signal || 'Child Process Exit', code || 0);
+  void runner.run(command, config).catch((e) => {
+    if (e instanceof Error) {
+      console.log('여기야?');
+      logger.error(e);
+    }
+    // process.exit(1);
   });
-  registeredRules = await register(await findNewPort(currentPorts), config);
 
-  execSync(`open http://${host}`);
-}
+  const signals: { [key: string]: number } = {
+    SIGINT: 2,
+    SIGTERM: 15,
+  };
 
-let exited = false;
+  let isExited = false;
 
-async function kill(
-  process: ChildProcess,
-  signal: number,
-  timeout?: number,
-): Promise<{
-  code: number | null;
-  signal: NodeJS.Signals | null;
-}> {
-  let isResolved = false;
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      isResolved = true;
-      reject(new Error('Process kill timeout'));
-    }, timeout || 10000);
-    process.once('exit', (code, signal) => {
-      childProcess = undefined;
-      if (isResolved) {
+  Object.keys(signals).forEach((signal) => {
+    process.on(signal, async () => {
+      if (isExited) {
         return;
       }
-      clearTimeout(timer);
-      resolve({
-        code,
-        signal,
-      });
+      isExited = true;
+      logger.log(`process stopped by ${signal}`);
+      await runner.kill(signals[signal]);
+      unwatchFile(configPath, configFileWatchListner);
+      process.exit(128 + signals[signal]);
     });
-    process.kill(signal);
   });
 }
-
-async function shutdown(signal: string, value: number) {
-  if (exited) {
-    return;
-  }
-  exited = true;
-  console.log(`[local-dev-proxy] stopped by ${signal}`);
-
-  if (childProcess) {
-    await kill(childProcess, value).catch(console.error);
-  }
-
-  if (registeredRules.length > 0) {
-    await deregister(registeredRules.map((x) => ({ key: x.key, target: x.target })));
-  }
-  process.exit(value);
-}
-
-const signals: { [key: string]: number } = {
-  SIGINT: 2,
-  SIGTERM: 15,
-};
-
-Object.keys(signals).forEach((signal) => {
-  process.once(signal, () => {
-    void shutdown(signal, 128 + signals[signal]);
-  });
-});
 
 main();

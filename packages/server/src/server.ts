@@ -40,7 +40,7 @@ async function shutdown(signal: string, value: number) {
     return;
   }
   exited = true;
-  console.log(`[local-dev-proxy] stopped by ${signal}`);
+  console.log(`Process stopped by ${signal}`);
   await Promise.all([
     new Promise<void>((resolve) =>
       httpServer.close(() => {
@@ -55,12 +55,17 @@ async function shutdown(signal: string, value: number) {
       }),
     ),
   ]);
-  console.log('[local-dev-proxy] all server closed ');
+  console.log('all server closed ');
   process.exit(128 + value);
 }
 
+let isExited = false;
 Object.keys(signals).forEach((signal) => {
-  process.once(signal, () => {
+  process.on(signal, () => {
+    if (isExited) {
+      return;
+    }
+    isExited = true;
     void shutdown(signal, signals[signal]);
   });
 });

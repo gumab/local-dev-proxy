@@ -33,7 +33,7 @@ module.exports = {
     'import/order': 'warn',
     'import/prefer-default-export': 'off',
     'no-alert': 'off',
-    'no-console': 'off',
+    'no-console': 'warn',
     'no-else-return': 'off',
     'no-nested-ternary': 'off',
     'no-plusplus': 'off',

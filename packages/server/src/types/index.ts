@@ -1,5 +1,6 @@
 export interface RouteRule {
   key: string;
+  https: boolean;
   priority?: number;
   path?: string | RegExp;
   host: string;
@@ -10,6 +11,7 @@ export interface RouteRule {
 
 export interface RouteRuleRequest {
   key: string;
+  https: boolean;
   priority?: number;
   path?: string | null;
   pathRegex?: string | null;

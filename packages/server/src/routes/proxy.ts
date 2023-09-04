@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { createProxyServer } from 'http-proxy';
 import { storage } from '../storage';
+import { NotFoundError } from '../libs/errors/NotFoundError';
 
 const proxyServer = createProxyServer({
   secure: false,
@@ -45,7 +46,11 @@ function makeProxyOption(req: Request): { target: string; ignorePath?: boolean; 
   });
 
   if (!rule) {
-    throw new Error(`[local-dev-proxy] 매칭되는 서버가 없습니다. (${req.hostname}${req.path})`);
+    throw new NotFoundError(`매칭되는 서버가 없습니다. (${req.protocol}://${req.hostname}${req.path})`);
+  } else if (!rule.https && req.protocol === 'https') {
+    throw new NotFoundError(
+      `HTTPS 가 설정되지 않았습니다. .ldprxrc.js 파일을 확인해주세요 (${req.protocol}://${req.hostname}${req.path})`,
+    );
   }
 
   if (rule.pathRewrite) {
@@ -69,8 +74,10 @@ export default function (req: Request, res: Response) {
     const option = fixLocalHost(makeProxyOption(req));
     proxyServer.web(req, res, option);
   } catch (e) {
-    if (e instanceof Error) {
-      res.status(500).send(e.message);
+    if (e instanceof NotFoundError) {
+      res.status(404).send(`[local-dev-proxy] ${e.message}`);
+    } else if (e instanceof Error) {
+      res.status(500).send(`[local-dev-proxy] ${e.message}`);
     } else {
       throw e;
     }
