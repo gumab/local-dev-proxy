@@ -23,10 +23,8 @@ function fixLocalHost<T extends { target: string }>(input: T) {
 
 function makeProxyOption(req: Request): { target: string; ignorePath?: boolean; cookieDomainRewrite?: string } {
   const rule = storage.getRules().find(({ host, path, referrer }) => {
-    if (host) {
-      if (host !== req.hostname) {
-        return false;
-      }
+    if (host !== req.hostname) {
+      return false;
     }
     if (path) {
       if (typeof path === 'string') {

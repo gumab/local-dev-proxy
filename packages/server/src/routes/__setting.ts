@@ -42,7 +42,12 @@ function addRules(req: RouteRuleRequest[]) {
       .getRules()
       .filter((x) => !filtered.some((y) => y.key === x.key || y.target === x.target))
       .concat(filtered)
-      .sort((a, b) => (a.priority || Number.MAX_VALUE) - (b.priority || Number.MAX_VALUE)),
+      .sort(
+        (a, b) =>
+          (a.priority || Number.MAX_VALUE) - (b.priority || Number.MAX_VALUE) ||
+          (a.referrer ? 0 : 1) - (b.referrer ? 0 : 1) ||
+          (a.path ? 0 : 1) - (b.path ? 0 : 1),
+      ),
   );
 
   return filtered;

@@ -59,13 +59,8 @@ async function shutdown(signal: string, value: number) {
   process.exit(128 + value);
 }
 
-let isExited = false;
 Object.keys(signals).forEach((signal) => {
   process.on(signal, () => {
-    if (isExited) {
-      return;
-    }
-    isExited = true;
     void shutdown(signal, signals[signal]);
   });
 });
