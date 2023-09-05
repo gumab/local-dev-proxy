@@ -56,7 +56,6 @@ function main() {
 
   void runner.run(command, config).catch((e) => {
     if (e instanceof Error) {
-      console.log('여기야?');
       logger.error(e);
     }
     // process.exit(1);

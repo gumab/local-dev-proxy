@@ -116,7 +116,10 @@ export default class ProcessRunner {
     });
     this.registeredRules = await register(await findNewPort(currentPorts), config);
 
-    execSync(`open ${config.https ? 'https' : 'http'}://${host}`);
+    const { https = false, homePath = '', openOnStart = true } = config;
+    if (openOnStart) {
+      execSync(`open ${https ? 'https' : 'http'}://${host}${homePath}`);
+    }
   }
 
   async kill(code: number) {
