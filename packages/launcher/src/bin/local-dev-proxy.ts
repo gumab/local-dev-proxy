@@ -4,6 +4,7 @@ import { watchFile, unwatchFile } from 'fs';
 import { LocalDevProxyOption } from '../types';
 import { logger } from '../utils/logger';
 import ProcessRunner from '../ProcessRunner';
+import { LdprxError } from '../libs/LdprxError';
 
 function getConfig(configPath: string): LocalDevProxyOption {
   try {
@@ -11,7 +12,7 @@ function getConfig(configPath: string): LocalDevProxyOption {
     // eslint-disable-next-line import/no-dynamic-require,global-require
     return require(configPath);
   } catch (e) {
-    throw new Error('.ldprxrc.js 파일이 필요합니다');
+    throw new LdprxError('.ldprxrc.js 파일이 필요합니다');
   }
 }
 
@@ -82,4 +83,12 @@ function main() {
   });
 }
 
-main();
+try {
+  main();
+} catch (e) {
+  if (e instanceof LdprxError) {
+    logger.error(e);
+  } else {
+    throw e;
+  }
+}

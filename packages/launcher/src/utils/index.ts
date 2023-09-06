@@ -1,5 +1,6 @@
 import { promisify } from 'util';
 import { exec, spawn, SpawnOptions } from 'child_process';
+import {LdprxError} from "../libs/LdprxError";
 
 function parseCommand(file: string, args?: string[]) {
   if (args) {
@@ -10,7 +11,7 @@ function parseCommand(file: string, args?: string[]) {
   } else {
     const split = file.match(/"[^"]+"|\S+/g);
     if (!split) {
-      throw new Error('command parsing Error');
+      throw new LdprxError('command parsing Error');
     }
     return {
       file: split[0],

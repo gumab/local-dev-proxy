@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import { healthCheck, waitForDockerRunning } from './docker-helper';
 import { LocalDevProxyOption, LocalDevProxySubRule, RouteRuleRequest } from './types';
 import { logger } from './utils/logger';
+import { LdprxError } from './libs/LdprxError';
 
 export type { LocalDevProxyOption };
 
@@ -49,7 +50,7 @@ export async function register(port: number, { https, rule, subRules = [] }: Loc
       logger.log(`등록 완료 [http://${first.host} >> ${target}]`);
     }
   } else {
-    throw new Error(`등록 실패 (${res.statusText})`);
+    throw new LdprxError(`등록 실패 (${res.statusText})`);
   }
   return request;
 }
@@ -69,6 +70,6 @@ export async function deregister(rules: { key: string; target: string }[]) {
   if (res.status === 200) {
     logger.log(`등록 해제 완료 (${rules.map((x) => x.key).toString()})`);
   } else {
-    throw new Error(`등록 해제 실패 (${res.statusText})`);
+    throw new LdprxError(`등록 해제 실패 (${res.statusText})`);
   }
 }

@@ -8,6 +8,7 @@ import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule, RouteRule
 import { waitForDockerRunning } from './docker-helper';
 import { UsableHosts } from './consts/usable-hosts';
 import { logger } from './utils/logger';
+import {LdprxError} from "./libs/LdprxError";
 
 function validateRule(rule: LocalDevProxyRule | LocalDevProxySubRule, https?: boolean, isSubRule?: boolean) {
   if (rule.key && rule.host && (!isSubRule || (rule as LocalDevProxySubRule).target)) {
@@ -16,7 +17,7 @@ function validateRule(rule: LocalDevProxyRule | LocalDevProxySubRule, https?: bo
     }
     return rule.host;
   } else {
-    throw new Error(`.ldprxrc.js 설정이 유효하지 않습니다.`);
+    throw new LdprxError(`.ldprxrc.js 설정이 유효하지 않습니다.`);
   }
 }
 
@@ -48,7 +49,7 @@ async function checkHostDns(host: string) {
         .then((x) => x.stdout)
         .catch(() => undefined);
       if (existHost) {
-        throw new Error(
+        throw new LdprxError(
           `${host} 은(는) 이미 다른 IP(${existHost.match(
             /[\d.]+/,
           )?.[0]})로 등록되어있습니다. 확인 후 다시 이용해주세요`,
@@ -104,7 +105,7 @@ export default class ProcessRunner {
     const currentPorts = await getCurrentPort();
     const host = validateConfig(config);
     if (!host) {
-      throw new Error(`.ldprxrc.js 설정이 유효하지 않습니다.`);
+      throw new LdprxError(`.ldprxrc.js 설정이 유효하지 않습니다.`);
     }
     await checkHostDns(host);
     await waitForDockerRunning();
