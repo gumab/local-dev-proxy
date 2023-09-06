@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { createProxyServer } from 'http-proxy';
 import { IncomingMessage } from 'http';
 import { Duplex } from 'stream';
+import { Socket } from 'net';
 import { storage } from '../storage';
 import { NotFoundError } from '../libs/errors/NotFoundError';
 import { NoneSslError } from '../libs/errors/NoneSslError';
@@ -91,7 +92,12 @@ export function proxyMiddleware(req: Request, res: Response) {
   }
 }
 
-const wsProxy = createProxyServer({ ws: true });
+const wsProxy = createProxyServer<IncomingMessage, Socket>({ ws: true });
+
+wsProxy.on('error', (err, req, res) => {
+  console.error(err);
+  res.destroy();
+});
 
 export function proxyWebSocket<Request extends typeof IncomingMessage = typeof IncomingMessage>(
   request: InstanceType<Request>,
