@@ -7,7 +7,7 @@
     "startwithbuild": "npm run build && node dist/server.js",
     "dev": "STORAGE=file concurrently \"npx tsc --watch\" \"nodemon -q index.js\"",
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc",
+    "build": "tsc",
     "docker:build:test": "docker build . -t local-dev-proxy-test:latest",
     "docker:run:test": "docker rm -f local-dev-proxy-test && docker run -d --name local-dev-proxy-test -p 8080:8080 local-dev-proxy-test:latest"
   },
