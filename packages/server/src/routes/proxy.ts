@@ -22,7 +22,7 @@ function fixLocalHost<T extends { target: string }>(input: T) {
 
   return {
     ...input,
-    target: input.target.replace(/(https?:\/\/)(?:localhost|127\.0\.0\.1)/, `$1${localhostIp}`),
+    target: input.target.replace(/(\/\/)(?:localhost|127\.0\.0\.1)/, `$1${localhostIp}`),
   };
 }
 
@@ -111,7 +111,7 @@ export function proxyWebSocket<Request extends typeof IncomingMessage = typeof I
     );
     if (rule) {
       const host = rule.target.replace(/https?:\/\/([^/]+).*/, '$1');
-      wsProxy.ws(request, socket, head, { target: `ws://${host}` });
+      wsProxy.ws(request, socket, head, fixLocalHost({ target: `ws://${host}` }));
       return;
     }
   }
