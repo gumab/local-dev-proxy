@@ -1,5 +1,6 @@
 import prompts from 'prompts';
 import { ChildProcess, execSync } from 'child_process';
+import opn from 'better-opn';
 import { execAsync, wrapSpawn } from './utils';
 import { findNewPort, getCurrentPort } from './utils/port-finder';
 import { deregister, register } from './index';
@@ -118,7 +119,7 @@ export default class ProcessRunner {
 
     const { https = false, homePath = '', openOnStart = true } = config;
     if (openOnStart) {
-      execSync(`open ${https ? 'https' : 'http'}://${host}${homePath}`);
+      opn(`${https ? 'https' : 'http'}://${host}${homePath}`);
     }
   }
 

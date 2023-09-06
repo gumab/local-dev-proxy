@@ -15,7 +15,8 @@
     "ldprx": "dist/bin/local-dev-proxy.js"
   },
   "scripts": {
-    "build": "tsc",
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
     "dev": "ts-node src/bin/local-dev-proxy.ts config-samples/.ldprxrc.example.js node sample-server.js",
     "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish",
     "prepublishOnly": "npm run build"
@@ -25,6 +26,7 @@
   "license": "ISC",
   "dependencies": {
     "arg": "^5.0.2",
+    "better-opn": "^3.0.2",
     "chalk": "^4.1.2",
     "node-fetch": "^2.7.0",
     "prompts": "^2.4.2"
