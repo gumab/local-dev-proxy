@@ -1,20 +1,23 @@
 import express from 'express';
 import https from 'https';
+import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import settingRouter from './routes/__setting';
-import proxy from './routes/proxy';
+import { proxyMiddleware, proxyWebSocket } from './routes/proxy';
 
 const httpPort = Number(process.env.HTTP_PORT) || 80;
 const httpsPort = Number(process.env.HTTPS_PORT) || 443;
 
 const app = express();
 app.use('/__setting', settingRouter);
-app.use(proxy);
+app.use(proxyMiddleware);
 
-const httpServer = app.listen(httpPort, () => {
+const httpServer = http.createServer(app).listen(httpPort, () => {
   console.log(`HTTP server listening on port ${httpPort}`);
 });
+
+httpServer.on('upgrade', proxyWebSocket);
 
 const httpsServer = https
   .createServer(

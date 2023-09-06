@@ -1,8 +1,11 @@
 import { Request, Response } from 'express';
 import { createProxyServer } from 'http-proxy';
+import { IncomingMessage } from 'http';
+import { Duplex } from 'stream';
 import { storage } from '../storage';
 import { NotFoundError } from '../libs/errors/NotFoundError';
 import { NoneSslError } from '../libs/errors/NoneSslError';
+import { RouteRule } from '../types';
 
 const proxyServer = createProxyServer({
   secure: false,
@@ -22,28 +25,31 @@ function fixLocalHost<T extends { target: string }>(input: T) {
   };
 }
 
-function makeProxyOption(req: Request): { target: string; ignorePath?: boolean; cookieDomainRewrite?: string } {
-  const rule = storage.getRules().find(({ host, path, referrer }) => {
-    if (host !== req.hostname) {
+function findProxyRule(rules: RouteRule[], reqHost: string, reqPath?: string, reqReferer?: string) {
+  return rules.find(({ host, path, referrer }) => {
+    if (host !== reqHost) {
       return false;
     }
-    if (path) {
+    if (path && reqPath) {
       if (typeof path === 'string') {
-        if (path !== req.path) {
+        if (path !== reqPath) {
           return false;
         }
-      } else if (!path.test(req.path)) {
+      } else if (!path.test(reqPath)) {
         return false;
       }
     }
-    if (referrer) {
-      if (!referrer.test(req.headers['referer']?.toString() || '')) {
+    if (referrer && reqReferer) {
+      if (!referrer.test(reqReferer)) {
         return false;
       }
     }
     return true;
   });
+}
 
+function makeProxyOption(req: Request): { target: string; ignorePath?: boolean; cookieDomainRewrite?: string } {
+  const rule = findProxyRule(storage.getRules(), req.hostname, req.path, req.headers['referer']);
   if (!rule) {
     throw new NotFoundError(`매칭되는 서버가 없습니다. (${req.protocol}://${req.hostname}${req.path})`);
   } else if (!rule.https && req.protocol === 'https') {
@@ -68,7 +74,7 @@ function makeProxyOption(req: Request): { target: string; ignorePath?: boolean; 
   };
 }
 
-export default function (req: Request, res: Response) {
+export function proxyMiddleware(req: Request, res: Response) {
   try {
     const option = fixLocalHost(makeProxyOption(req));
     proxyServer.web(req, res, option);
@@ -83,4 +89,25 @@ export default function (req: Request, res: Response) {
       throw e;
     }
   }
+}
+
+const wsProxy = createProxyServer({ ws: true });
+
+export function proxyWebSocket<Request extends typeof IncomingMessage = typeof IncomingMessage>(
+  request: InstanceType<Request>,
+  socket: Duplex,
+  head: Buffer,
+) {
+  if (request.headers.host) {
+    const rule = findProxyRule(
+      storage.getRules().filter((x) => /localhost/.test(x.target)),
+      request.headers.host,
+    );
+    if (rule) {
+      const host = rule.target.replace(/https?:\/\/([^/]+).*/, '$1');
+      wsProxy.ws(request, socket, head, { target: `ws://${host}` });
+      return;
+    }
+  }
+  socket.destroy();
 }
