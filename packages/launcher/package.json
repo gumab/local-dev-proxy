@@ -16,7 +16,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc",
+    "build": "tsc",
     "dev": "ts-node src/bin/local-dev-proxy.ts config-samples/.ldprxrc.example.js node sample-server.js",
     "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish",
     "prepublishOnly": "npm run build"
