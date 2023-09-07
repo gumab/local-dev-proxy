@@ -17,6 +17,14 @@ function getConfig(configPath: string): LocalDevProxyOption {
   }
 }
 
+function handleError(e: unknown) {
+  if (e instanceof LdprxError) {
+    logger.error(e);
+  } else {
+    throw e;
+  }
+}
+
 function parseArgv(): {
   configPath: string;
   command: string[];
@@ -50,25 +58,17 @@ function main() {
 
   const configFileWatchListner = async () => {
     logger.log('config 파일에 변경이 감지되었습니다. 프로세스를 다시 시작합니다', 'blueBright');
-    await runner.kill(2);
-    void runner.run(command, getConfig(configPath)).catch((e) => {
-      if (e instanceof Error) {
-        logger.error(e);
-      }
-    });
+    try {
+      await runner.kill(2);
+      await runner.run(command, getConfig(configPath));
+    } catch (e) {
+      handleError(e);
+    }
   };
 
   watchFile(configPath, configFileWatchListner);
-  // runner.onExit = () => {
-  //   unwatchFile(configPath, configFileWatchListner);
-  // };
 
-  void runner.run(command, config).catch((e) => {
-    if (e instanceof Error) {
-      logger.error(e);
-    }
-    // process.exit(1);
-  });
+  void runner.run(command, config).catch(handleError);
 
   const signals: { [key: string]: number } = {
     SIGINT: 2,
@@ -94,9 +94,5 @@ function main() {
 try {
   main();
 } catch (e) {
-  if (e instanceof LdprxError) {
-    logger.error(e);
-  } else {
-    throw e;
-  }
+  handleError(e);
 }
