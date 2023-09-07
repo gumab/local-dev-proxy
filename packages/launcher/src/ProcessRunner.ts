@@ -8,7 +8,7 @@ import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule, RouteRule
 import { waitForDockerRunning } from './docker-helper';
 import { UsableHosts } from './consts/usable-hosts';
 import { logger } from './utils/logger';
-import {LdprxError} from "./libs/LdprxError";
+import { LdprxError } from './libs/LdprxError';
 
 function validateRule(rule: LocalDevProxyRule | LocalDevProxySubRule, https?: boolean, isSubRule?: boolean) {
   if (rule.key && rule.host && (!isSubRule || (rule as LocalDevProxySubRule).target)) {
@@ -92,8 +92,6 @@ async function kill(
 }
 
 export default class ProcessRunner {
-  public onExit?: () => void;
-
   private cp?: ChildProcess;
 
   private registeredRules: RouteRuleRequest[] = [];
@@ -114,7 +112,6 @@ export default class ProcessRunner {
     this.cp.on('exit', async (code) => {
       this.cp = undefined;
       await this.kill(code || 0);
-      this.onExit?.();
     });
     this.registeredRules = await register(await findNewPort(currentPorts), config);
 

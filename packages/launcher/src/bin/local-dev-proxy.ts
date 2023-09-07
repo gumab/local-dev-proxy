@@ -5,6 +5,7 @@ import { LocalDevProxyOption } from '../types';
 import { logger } from '../utils/logger';
 import ProcessRunner from '../ProcessRunner';
 import { LdprxError } from '../libs/LdprxError';
+import { wrapSpawn } from '../utils';
 
 function getConfig(configPath: string): LocalDevProxyOption {
   try {
@@ -38,6 +39,13 @@ function parseArgv(): {
 function main() {
   const runner = new ProcessRunner();
   const { command, configPath } = parseArgv();
+
+  if (process.arch !== 'arm64') {
+    logger.error('는 Apple Silicon Mac 에서만 사용 가능합니다.');
+    wrapSpawn(command[0], command.slice(1), { stdio: 'inherit' });
+    return;
+  }
+
   const config = getConfig(configPath);
 
   const configFileWatchListner = async () => {

@@ -17,8 +17,6 @@ const httpServer = http.createServer(app).listen(httpPort, () => {
   console.log(`HTTP server listening on port ${httpPort}`);
 });
 
-httpServer.on('upgrade', proxyWebSocket);
-
 const httpsServer = https
   .createServer(
     {
@@ -31,39 +29,49 @@ const httpsServer = https
     console.log(`HTTPS server listening on port ${httpsPort}`);
   });
 
-const signals: { [key: string]: number } = {
-  SIGINT: 2,
-  SIGTERM: 15,
-};
+httpServer.on('upgrade', proxyWebSocket);
+httpsServer.on('upgrade', proxyWebSocket);
 
-let exited = false;
-
-async function shutdown(signal: string, value: number) {
-  if (exited) {
-    return;
-  }
-  exited = true;
-  console.log(`Process stopped by ${signal}`);
-  await Promise.all([
-    new Promise<void>((resolve) =>
-      httpServer.close(() => {
-        console.log('http server closed');
-        resolve();
-      }),
-    ),
-    new Promise<void>((resolve) =>
-      httpsServer.close(() => {
-        console.log('https server closed');
-        resolve();
-      }),
-    ),
-  ]);
-  console.log('all server closed ');
-  process.exit(128 + value);
-}
-
-Object.keys(signals).forEach((signal) => {
-  process.on(signal, () => {
-    void shutdown(signal, signals[signal]);
-  });
-});
+// Graceful Shutdown 비활성
+// const signals: { [key: string]: number } = {
+//   SIGINT: 2,
+//   SIGTERM: 15,
+// };
+//
+// let exited = false;
+//
+// async function shutdown(signal: string, value: number) {
+//   if (exited) {
+//     return;
+//   }
+//   exited = true;
+//   console.log(`Process stopped by ${signal}`);
+//
+//   const timeout = setTimeout(() => {
+//     console.log('graceful shutdown timed out after 3000ms');
+//     process.exit(128 + value);
+//   }, 3000);
+//   await Promise.all([
+//     new Promise<void>((resolve) =>
+//       httpServer.close(() => {
+//         console.log('http server closed');
+//         resolve();
+//       }),
+//     ),
+//     new Promise<void>((resolve) =>
+//       httpsServer.close(() => {
+//         console.log('https server closed');
+//         resolve();
+//       }),
+//     ),
+//   ]);
+//   clearTimeout(timeout);
+//   console.log('all server closed ');
+//   process.exit(128 + value);
+// }
+//
+// Object.keys(signals).forEach((signal) => {
+//   process.on(signal, () => {
+//     void shutdown(signal, signals[signal]);
+//   });
+// });
