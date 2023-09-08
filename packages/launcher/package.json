@@ -1,5 +1,8 @@
 {
   "name": "@thefarmersfront/local-dev-proxy",
+  "os": [
+    "darwin"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefarmersfront/local-dev-proxy.git"
@@ -7,7 +10,7 @@
   "publishConfig": {
     "@thefarmersfront:registry": "https://npm.pkg.github.com/"
   },
-  "version": "0.4.5",
+  "version": "0.4.6",
   "main": "dist/index.ts",
   "types": "dist/index.d.ts",
   "bin": {
@@ -19,7 +22,7 @@
     "build": "tsc",
     "dev": "ts-node src/bin/local-dev-proxy.ts config-samples/.ldprxrc.example.js node sample-server.js",
     "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [],
   "author": "배창원",
