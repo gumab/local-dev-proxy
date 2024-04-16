@@ -2,7 +2,7 @@ import { execAsync } from './index';
 import { getProcessForPort } from './getProcessForPort';
 
 export async function getCurrentPort(): Promise<number[]> {
-  const stdout = await execAsync('lsof -i -n -P|grep "node.*LISTEN"')
+  const stdout = await execAsync('lsof -i -n -P|grep -e "esbuild.*LISTEN" -e "node.*LISTEN"')
     .then((x) => x.stdout)
     .catch(() => undefined);
   if (stdout) {
