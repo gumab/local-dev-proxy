@@ -1,8 +1,10 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
+import multer, { diskStorage } from 'multer';
 import { RouteRule, RouteRuleRequest } from '../types';
 import { storage } from '../storage';
+import { certs } from '../server';
 
 function getStringOrRegex(regexInput?: string | null): RegExp | undefined;
 function getStringOrRegex(regexInput?: string | null, strInput?: string | null): RegExp | string | undefined;
@@ -100,8 +102,26 @@ settingRouter.get('/rules', (req: Request, res: Response) => {
   );
 });
 
-settingRouter.get('/download-cert', (req: Request, res: Response) => {
-  res.download(path.join(process.cwd(), './keys/cert.pem'));
+settingRouter.get('/download-key', (req: Request, res: Response) => {
+  res.download(path.join(process.cwd(), './keys/key.pem'));
 });
+
+settingRouter.post(
+  '/register-cert',
+  multer({
+    storage: diskStorage({
+      destination: path.join(process.cwd(), './keys/'),
+      filename: (req, file, callback) => {
+        callback(null, file.originalname);
+      },
+    }),
+  }).single('data'),
+  (req: Request, res: Response) => {
+    if (req.file) {
+      delete certs[req.file.originalname.replace(/\.pem$/, '')];
+    }
+    res.json({ success: true, path: req.file?.path });
+  },
+);
 
 export default settingRouter;

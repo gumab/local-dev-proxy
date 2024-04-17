@@ -3,6 +3,7 @@ import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
+import { createSecureContext } from 'tls';
 import settingRouter from './routes/__setting';
 import { proxyMiddleware, proxyWebSocket } from './routes/proxy';
 
@@ -17,11 +18,46 @@ const httpServer = http.createServer(app).listen(httpPort, () => {
   console.log(`HTTP server listening on port ${httpPort}`);
 });
 
+const keyFile = fs.readFileSync(path.join(process.cwd(), './keys/key.pem'));
+const defaultCertFile = fs.readFileSync(path.join(process.cwd(), './keys/cert.pem'));
+
+export const certs: { [domain: string]: Buffer | undefined } = {};
+
+function getCert(domain: string) {
+  const exists = certs[domain];
+  if (exists) {
+    return exists;
+  } else {
+    const file = fs.readFileSync(path.join(process.cwd(), `./keys/${domain}.pem`));
+    certs[domain] = file;
+    return file;
+  }
+}
+
 const httpsServer = https
   .createServer(
     {
-      key: fs.readFileSync(path.join(process.cwd(), './keys/key.pem')),
-      cert: fs.readFileSync(path.join(process.cwd(), './keys/cert.pem')),
+      SNICallback: (domain, callback) => {
+        try {
+          callback(
+            null,
+            createSecureContext({
+              key: keyFile,
+              cert: getCert(domain),
+            }),
+          );
+        } catch (e) {
+          callback(
+            null,
+            createSecureContext({
+              key: keyFile,
+              cert: defaultCertFile,
+            }),
+          );
+        }
+      },
+      key: keyFile,
+      cert: defaultCertFile,
     },
     app,
   )

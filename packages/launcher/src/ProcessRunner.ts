@@ -8,7 +8,7 @@ import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule, RouteRule
 import { waitForDockerRunning } from './docker-helper';
 import { logger } from './utils/logger';
 import { LdprxError } from './libs/LdprxError';
-import { installCertificate, parseCertificateFile } from './utils/certificate-helper';
+import { setCertificateFile } from './utils/certificate-helper';
 
 function validateRule(rule: LocalDevProxyRule | LocalDevProxySubRule, https?: boolean, isSubRule?: boolean) {
   if (rule.key && rule.host && (!isSubRule || (rule as LocalDevProxySubRule).target)) {
@@ -61,35 +61,22 @@ async function checkHostDns(host: string) {
 }
 
 async function checkCertificates(host: string) {
+  const tempKeyPath = 'temp-key.pem';
+  const tempCertPath = `${host}.pem`;
   try {
-    await execAsync('curl -o temp.pem http://localhost/__setting/download-cert');
-    const certInfo = await parseCertificateFile('temp.pem');
-    if (!certInfo) {
-      logger.warn('인증서 설정이 올바르지 않아 https 서비스가 정상적으로 동작하지 않을 수 있습니다.');
-      return;
-    }
-
-    if (!certInfo.domainRegexes.some((x) => x.test(host))) {
-      logger.warn(`${host}은(는) https 로 사용할 수 없는 도메인입니다`);
-    } else if (certInfo.isCertExists) {
-      logger.log(`${certInfo.cn} 인증서를 이용하여 https://${host} 가 활성화됩니다.`);
-    }
-
-    if (!certInfo.isCertExists) {
-      const { trustCert } = await prompts({
-        type: 'confirm',
-        name: 'trustCert',
-        message: `[local-dev-proxy] \n${certInfo.certText}\nHTTPS 사용을 위한 인증서가 설치되지 않았습니다. 정상적인 사용을 위해서는 인증서 설치가 필요합니다.\n위 인증서를 신뢰할 수 있는 인증서에 추가하시겠습니까?`,
-        initial: true,
-      });
-      if (trustCert) {
-        await installCertificate('temp.pem');
-      }
-    }
+    await execAsync(`curl -o ${tempKeyPath} http://localhost/__setting/download-key`);
+    await setCertificateFile(tempKeyPath, tempCertPath, host);
+    await execAsync(`curl -F 'data=@${tempCertPath}' http://localhost/__setting/register-cert`);
+    logger.log(`${tempCertPath} 인증서를 이용하여 https://${host} 가 활성화됩니다.`);
   } catch (e) {
-    if (e instanceof Error) logger.error(e);
+    logger.warn(
+      `인증서 설정이 올바르게 되지 않아 https 서비스가 정상적으로 동작하지 않을 수 있습니다.${
+        e instanceof Error ? `\n${e.message}` : ''
+      }`,
+    );
   } finally {
-    await execAsync('rm -f temp.pem');
+    await execAsync(`rm -f ${tempKeyPath}`);
+    await execAsync(`rm -f ${tempCertPath}`);
   }
 }
 

@@ -10,7 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@thefarmersfront/local-dev-proxy": "0.4.0",
+    "@thefarmersfront/local-dev-proxy": "0.5.0",
     "express": "^4.18.2"
   },
   "devDependencies": {
