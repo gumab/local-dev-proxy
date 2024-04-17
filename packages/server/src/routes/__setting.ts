@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
+import path from 'path';
 import { RouteRule, RouteRuleRequest } from '../types';
 import { storage } from '../storage';
 
@@ -97,6 +98,10 @@ settingRouter.get('/rules', (req: Request, res: Response) => {
       referrer: x.referrer?.toString(),
     })),
   );
+});
+
+settingRouter.get('/download-cert', (req: Request, res: Response) => {
+  res.download(path.join(process.cwd(), './keys/cert.pem'));
 });
 
 export default settingRouter;

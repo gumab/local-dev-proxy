@@ -4,12 +4,6 @@
     "type": "git",
     "url": "https://github.com/thefarmersfront/local-dev-proxy"
   },
-  "publishConfig": {
-    "@thefarmersfront:registry": "https://npm.pkg.github.com/"
-  },
-  "scripts": {
-    "set-usable-hosts": "node scripts/set-usable-hosts.js"
-  },
   "keywords": [],
   "author": "배창원",
   "license": "ISC",
