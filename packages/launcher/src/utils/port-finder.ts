@@ -44,7 +44,6 @@ export async function findNewPort(pid: number, timeout?: number): Promise<number
       const currentProcess = await getCurrentProcesses();
       const pids = await getRelatedPids(pid);
       const processes = currentProcess.filter((x) => pids.includes(x.pid));
-      console.log(processes);
       if (processes.length > 1) {
         reject(
           new LdprxError(
