@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import prompts from 'prompts';
-import { isValidCertKeyPair } from 'ssl-validator';
+import { isValidCertKeyPair, isValidCertToDomain } from 'ssl-validator';
 import { execAsync } from './index';
 import { logger } from './logger';
 
@@ -9,12 +9,12 @@ const EMAIL_ADDRESS = 'launcher@ldprx.dev';
 
 async function getExistingCertificates(keyFilePath: string, cn: string) {
   if (
-    await execAsync(`security find-certificate -c ${cn} -a`)
+    await execAsync(`security find-certificate -c ${cn} -a | grep '"${cn}"'`)
       .then((x) => !!x.stdout)
       .catch(() => false)
   ) {
     const key = fs.readFileSync(keyFilePath).toString();
-    const certs = await execAsync(`security find-certificate -c ${cn} -a -m -Z -p`).then((x) =>
+    const certs = await execAsync(`security find-certificate -c ${cn} -ampZ`).then((x) =>
       x.stdout
         .split(/(?=SHA-256 hash)/)
         .filter((x) => x.includes(EMAIL_ADDRESS))
@@ -36,8 +36,9 @@ async function getExistingCertificates(keyFilePath: string, cn: string) {
       certs.map(async (cert) => ({
         ...cert,
         isValid: await isValidCertKeyPair(cert.cert, key),
+        isValidDomain: await isValidCertToDomain(cert.cert, cn),
       })),
-    );
+    ).then((x) => x.filter((x) => x.isValidDomain));
   }
   return [];
 }

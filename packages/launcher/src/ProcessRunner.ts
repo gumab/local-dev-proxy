@@ -10,21 +10,34 @@ import { logger } from './utils/logger';
 import { LdprxError } from './libs/LdprxError';
 import { setCertificateFile } from './utils/certificate-helper';
 
-function validateRule(rule: LocalDevProxyRule | LocalDevProxySubRule, https?: boolean, isSubRule?: boolean) {
-  if (rule.key && rule.host && (!isSubRule || (rule as LocalDevProxySubRule).target)) {
-    return rule.host;
-  } else {
-    throw new LdprxError(`.ldprxrc.js 설정이 유효하지 않습니다.`);
+function makeConfigError(message: string) {
+  return new LdprxError(`.ldprxrc.js 설정이 유효하지 않습니다.\n${message}`);
+}
+
+function validateRule(rule: LocalDevProxyRule) {
+  if (!rule.key) {
+    throw makeConfigError('key 값이 없습니다');
+  } else if (!rule.host) {
+    throw makeConfigError(`${rule.key}의 host 값이 없습니다`);
+  }
+
+  return rule.host;
+}
+
+function validateSubRule(rule: LocalDevProxySubRule) {
+  validateRule(rule);
+  if (!rule.target) {
+    throw makeConfigError(`${rule.key}의 target 값이 없습니다`);
   }
 }
 
 function validateConfig(config: LocalDevProxyOption): string {
-  config.subRules?.forEach((subRule) => validateRule(subRule, config.https, true));
+  config.subRules?.forEach((subRule) => validateSubRule(subRule));
 
   if (config.rule instanceof Array) {
-    return validateRule(config.rule[0], config.https);
+    return validateRule(config.rule[0]);
   } else {
-    return validateRule(config.rule, config.https);
+    return validateRule(config.rule);
   }
 }
 
@@ -119,9 +132,6 @@ export default class ProcessRunner {
     this.isRunning = true;
     const currentPorts = await getCurrentPort();
     const host = validateConfig(config);
-    if (!host) {
-      throw new LdprxError(`.ldprxrc.js 설정이 유효하지 않습니다.`);
-    }
     await checkHostDns(host);
     await waitForDockerRunning();
     if (config.https) {

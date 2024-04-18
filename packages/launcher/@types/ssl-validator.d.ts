@@ -9,3 +9,15 @@ export function isValidCertKeyPair(
     password?: string;
   },
 ): Promise<boolean>;
+
+export function isValidCertToDomain(
+  cert: string,
+  domain: string,
+  options?: {
+    skipDateValidation?: boolean;
+    key?: string;
+    bundle?: string;
+    skipFormatValidation?: boolean;
+    password?: string;
+  },
+): Promise<boolean>;
