@@ -48,6 +48,13 @@ export interface LocalDevProxySubRule extends Omit<LocalDevProxyRule, 'host'> {
 
 export interface LocalDevProxyOption {
   /**
+   * 로컬서버가 실행될 포트
+   * 'auto' 일 경우 실행된 프로세스에서 자동으로 찾습니다.
+   * 두개 이상의 서버를 띄워야 하는 경우에만 명시적으로 사용
+   * default: 'auto'
+   */
+  localServerPort?: 'auto' | number;
+  /**
    * 현재 앱의 홈 Path
    * 최초 실행시 사용
    * ex. '/main'

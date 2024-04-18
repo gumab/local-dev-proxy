@@ -1,7 +1,7 @@
 import { ChildProcess } from 'child_process';
 import opn from 'better-opn';
 import { wrapSpawn } from './utils';
-import { findNewPort, getCurrentPort } from './utils/port-finder';
+import { findNewPort } from './utils/port-finder';
 import { deregister, register } from './index';
 import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule, RouteRuleRequest } from './types';
 import { waitForDockerRunning } from './docker-helper';
@@ -99,7 +99,7 @@ export default class ProcessRunner {
 
   async run(command: string[], config: LocalDevProxyOption) {
     this.isRunning = true;
-    const currentPorts = await getCurrentPort();
+    const localServerPort = typeof config.localServerPort === 'number' ? config.localServerPort : undefined;
     const { mainRules, subRules } = validateConfig(config);
     const hosts = getHosts(mainRules, subRules);
 
@@ -117,7 +117,10 @@ export default class ProcessRunner {
       this.cp = undefined;
       await this.kill(code || 0);
     });
-    this.registeredRules = await register(await findNewPort(currentPorts), mainRules, subRules);
+    if (!this.cp.pid) {
+      throw new LdprxError('알 수 없는 오류 발생 (child process 의 PID를 찾을 수 없음)');
+    }
+    this.registeredRules = await register(localServerPort || (await findNewPort(this.cp.pid)), mainRules, subRules);
 
     const { homePath = '', openOnStart = true } = config;
     if (openOnStart) {
