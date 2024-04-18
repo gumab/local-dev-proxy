@@ -1,14 +1,15 @@
-import prompts from 'prompts';
-import { ChildProcess, execSync } from 'child_process';
+import { ChildProcess } from 'child_process';
 import opn from 'better-opn';
-import { execAsync, wrapSpawn } from './utils';
+import { wrapSpawn } from './utils';
 import { findNewPort, getCurrentPort } from './utils/port-finder';
 import { deregister, register } from './index';
 import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule, RouteRuleRequest } from './types';
 import { waitForDockerRunning } from './docker-helper';
 import { logger } from './utils/logger';
 import { LdprxError } from './libs/LdprxError';
-import { setCertificateFile } from './utils/certificate-helper';
+import { checkCertificates } from './utils/certificate-helper';
+import { checkHostDns } from './utils/hosts-helper';
+import { callPromiseSequentially } from './utils/promise-helper';
 
 function makeConfigError(message: string) {
   return new LdprxError(`.ldprxrc.js 설정이 유효하지 않습니다.\n${message}`);
@@ -25,72 +26,29 @@ function validateRule(rule: LocalDevProxyRule) {
 }
 
 function validateSubRule(rule: LocalDevProxySubRule) {
-  validateRule(rule);
-  if (!rule.target) {
-    throw makeConfigError(`${rule.key}의 target 값이 없습니다`);
+  if (!rule.key) {
+    throw makeConfigError('key 값이 없습니다');
+  } else if (!rule.targetOrigin) {
+    throw makeConfigError(`${rule.key}의 targetOrigin 값이 없습니다`);
+  } else if (!/^https?:\/\/[^/]+$/.test(rule.targetOrigin)) {
+    throw makeConfigError(
+      `${rule.key}의 targetOrigin 값이 유효하지 않습니다. http[s]://sample.my-domain.com 형식으로 넣어주세요`,
+    );
   }
 }
 
-function validateConfig(config: LocalDevProxyOption): string {
+function validateConfig(config: LocalDevProxyOption) {
+  const mainRules = config.rule instanceof Array ? config.rule : [config.rule];
+
   config.subRules?.forEach((subRule) => validateSubRule(subRule));
 
-  if (config.rule instanceof Array) {
-    return validateRule(config.rule[0]);
+  if (mainRules.length > 0) {
+    mainRules.forEach(validateRule);
   } else {
-    return validateRule(config.rule);
+    throw makeConfigError('rule 설정이 하나 이상 있어야 합니다');
   }
-}
 
-async function checkHostDns(host: string) {
-  const isRegistered =
-    host === '127.0.0.1' ||
-    !!(await execAsync(`cat "/etc/hosts"|grep "127\\.0\\.0\\.1\\s*${host}"`)
-      .then((x) => x.stdout)
-      .catch(() => undefined));
-  if (!isRegistered) {
-    const { registerHost } = await prompts({
-      type: 'confirm',
-      name: 'registerHost',
-      message: `[local-dev-proxy] Host가 등록되지 않았습니다.\n127.0.0.1\t${host}\n항목을 /etc/hosts 파일에 추가하시겠습니까?`,
-      initial: true,
-    });
-    if (registerHost) {
-      const existHost = await execAsync(`cat "/etc/hosts"|grep ${host}`)
-        .then((x) => x.stdout)
-        .catch(() => undefined);
-      if (existHost) {
-        throw new LdprxError(
-          `${host} 은(는) 이미 다른 IP(${existHost.match(
-            /[\d.]+/,
-          )?.[0]})로 등록되어있습니다. 확인 후 다시 이용해주세요`,
-        );
-      }
-
-      process.stdout.write('맥 패스워드를 입력하세요\n');
-      execSync(`echo "127.0.0.1\t${host}" | sudo tee -a /etc/hosts`);
-      logger.log('/etc/hosts 파일이 변경되었습니다.');
-    }
-  }
-}
-
-async function checkCertificates(host: string) {
-  const tempKeyPath = 'temp-key.pem';
-  const tempCertPath = `${host}.pem`;
-  try {
-    await execAsync(`curl -o ${tempKeyPath} http://localhost/__setting/download-key`);
-    await setCertificateFile(tempKeyPath, tempCertPath, host);
-    await execAsync(`curl -F 'data=@${tempCertPath}' http://localhost/__setting/register-cert`);
-    logger.log(`${tempCertPath} 인증서를 이용하여 https://${host} 가 활성화됩니다.`);
-  } catch (e) {
-    logger.warn(
-      `인증서 설정이 올바르게 되지 않아 https 서비스가 정상적으로 동작하지 않을 수 있습니다.${
-        e instanceof Error ? `\n${e.message}` : ''
-      }`,
-    );
-  } finally {
-    await execAsync(`rm -f ${tempKeyPath}`);
-    await execAsync(`rm -f ${tempCertPath}`);
-  }
+  return { mainRules, subRules: config.subRules || [] };
 }
 
 async function kill(
@@ -121,6 +79,17 @@ async function kill(
   });
 }
 
+function getHosts(mainRules: LocalDevProxyRule[], subRules: LocalDevProxySubRule[]) {
+  const ruleList: (LocalDevProxyRule | LocalDevProxySubRule)[] = mainRules;
+
+  return ruleList.concat(subRules).reduce<{ host: string; https: boolean }[]>((result, { host, https = false }) => {
+    if (host && !result.some((x) => x.host === host && x.https === https)) {
+      return result.concat({ host, https });
+    }
+    return result;
+  }, []);
+}
+
 export default class ProcessRunner {
   private cp?: ChildProcess;
 
@@ -131,23 +100,28 @@ export default class ProcessRunner {
   async run(command: string[], config: LocalDevProxyOption) {
     this.isRunning = true;
     const currentPorts = await getCurrentPort();
-    const host = validateConfig(config);
-    await checkHostDns(host);
+    const { mainRules, subRules } = validateConfig(config);
+    const hosts = getHosts(mainRules, subRules);
+
+    await checkHostDns(hosts.map((x) => x.host));
     await waitForDockerRunning();
-    if (config.https) {
-      await checkCertificates(host);
-    }
+    await callPromiseSequentially(
+      hosts
+        .filter((x) => x.https)
+        .map((x) => x.host)
+        .map((x) => () => checkCertificates(x)),
+    );
 
     this.cp = wrapSpawn(command[0], command.slice(1), { stdio: 'inherit' });
     this.cp.on('exit', async (code) => {
       this.cp = undefined;
       await this.kill(code || 0);
     });
-    this.registeredRules = await register(await findNewPort(currentPorts), config);
+    this.registeredRules = await register(await findNewPort(currentPorts), mainRules, subRules);
 
-    const { https = false, homePath = '', openOnStart = true } = config;
+    const { homePath = '', openOnStart = true } = config;
     if (openOnStart) {
-      opn(`${https ? 'https' : 'http'}://${host}${homePath}`);
+      opn(`${hosts[0].https ? 'https' : 'http'}://${hosts[0].host}${homePath}`);
     }
   }
 

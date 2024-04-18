@@ -4,6 +4,7 @@ import prompts from 'prompts';
 import { isValidCertKeyPair, isValidCertToDomain } from 'ssl-validator';
 import { execAsync } from './index';
 import { logger } from './logger';
+import { checkSudo } from './sudo-helper';
 
 const EMAIL_ADDRESS = 'launcher@ldprx.dev';
 
@@ -65,7 +66,7 @@ export async function setCertificateFile(keyFilePath: string, certFilePath: stri
       },
     );
 
-    process.stdout.write('맥 패스워드를 입력하세요\n');
+    await checkSudo();
     execSync(
       certs
         .filter((x) => !x.isValid)
@@ -74,5 +75,27 @@ export async function setCertificateFile(keyFilePath: string, certFilePath: stri
         .join(' && '),
     );
     logger.log('인증서 설치가 완료되었습니다.');
+  } else {
+    throw new Error('사용자 취소');
+  }
+}
+
+export async function checkCertificates(host: string) {
+  const tempKeyPath = 'temp-key.pem';
+  const tempCertPath = `${host}.pem`;
+  try {
+    await execAsync(`curl -o ${tempKeyPath} http://localhost/__setting/download-key`);
+    await setCertificateFile(tempKeyPath, tempCertPath, host);
+    await execAsync(`curl -F 'data=@${tempCertPath}' http://localhost/__setting/register-cert`);
+    logger.log(`${tempCertPath} 인증서를 이용하여 https://${host} 가 활성화됩니다.`);
+  } catch (e) {
+    logger.warn(
+      `인증서 설정이 올바르게 되지 않아 https 서비스가 정상적으로 동작하지 않을 수 있습니다.${
+        e instanceof Error ? `\n${e.message}` : ''
+      }`,
+    );
+  } finally {
+    await execAsync(`rm -f ${tempKeyPath}`);
+    await execAsync(`rm -f ${tempCertPath}`);
   }
 }

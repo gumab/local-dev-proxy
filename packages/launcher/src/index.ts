@@ -1,38 +1,43 @@
 import fetch from 'node-fetch';
 import { healthCheck, waitForDockerRunning } from './docker-helper';
-import { LocalDevProxyOption, LocalDevProxySubRule, RouteRuleRequest } from './types';
+import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule, RouteRuleRequest } from './types';
 import { logger } from './utils/logger';
 import { LdprxError } from './libs/LdprxError';
 
 export type { LocalDevProxyOption };
 
-function packRequest(input: LocalDevProxySubRule, https?: boolean): RouteRuleRequest {
+function packRequest(
+  { host, targetOrigin, https, path, referrer, ...input }: LocalDevProxySubRule,
+  mainRule: LocalDevProxyRule,
+): RouteRuleRequest {
   return {
     ...input,
+    target: targetOrigin,
+    host: host || mainRule.host,
     https: https ?? false,
-    path: input.path && typeof input.path === 'string' ? input.path : null,
-    pathRegex: input.path && typeof input.path !== 'string' ? input.path.toString() : null,
-    referrerRegex: input.referrer ? input.referrer.toString() : null,
+    path: path && typeof path === 'string' ? path : null,
+    pathRegex: path && typeof path !== 'string' ? path.toString() : null,
+    referrerRegex: referrer ? referrer.toString() : null,
   };
 }
 
-export async function register(port: number, { https, rule, subRules = [] }: LocalDevProxyOption) {
+export async function register(port: number, mainRules: LocalDevProxyRule[], subRules: LocalDevProxySubRule[]) {
   await waitForDockerRunning();
 
-  const target = `http://localhost:${port}`;
+  const mainRule = mainRules[0];
+
+  const targetOrigin = `http://localhost:${port}`;
 
   /**
    * @type {RouteRuleRequest[]}
    */
   const request: RouteRuleRequest[] = [
-    ...(rule instanceof Array
-      ? rule.map((x) => ({
-          ...x,
-          target,
-        }))
-      : [{ ...rule, target }]),
+    ...mainRules.map((x) => ({
+      ...x,
+      targetOrigin,
+    })),
     ...subRules,
-  ].map((x) => packRequest(x, https));
+  ].map((x) => packRequest(x, mainRule));
 
   const res = await fetch('http://localhost/__setting/register', {
     method: 'post',
@@ -43,11 +48,10 @@ export async function register(port: number, { https, rule, subRules = [] }: Loc
   });
 
   if (res.status === 200) {
-    const first = rule instanceof Array ? rule[0] : rule;
-    if (https) {
-      logger.log(`등록 완료 [https://${first.host}, http://${first.host} >> ${target}]`);
+    if (mainRule.https) {
+      logger.log(`등록 완료 [https://${mainRule.host}, http://${mainRule.host} >> ${targetOrigin}]`);
     } else {
-      logger.log(`등록 완료 [http://${first.host} >> ${target}]`);
+      logger.log(`등록 완료 [http://${mainRule.host} >> ${targetOrigin}]`);
     }
   } else {
     throw new LdprxError(`등록 실패 (${res.statusText})`);

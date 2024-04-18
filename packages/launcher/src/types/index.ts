@@ -4,6 +4,11 @@ export interface LocalDevProxyRule {
    */
   key: string;
   /**
+   * https 사용 여부
+   * default: false
+   */
+  https?: boolean;
+  /**
    * 라우팅 기준이 될 Hostname
    * ex) www.local.kurly.com
    */
@@ -27,20 +32,21 @@ export interface LocalDevProxyRule {
   pathRewrite?: { [key: string]: string };
 }
 
-export interface LocalDevProxySubRule extends LocalDevProxyRule {
+export interface LocalDevProxySubRule extends Omit<LocalDevProxyRule, 'host'> {
   /**
-   * 목적지 주소
+   * 라우팅 기준이 될 Hostname
+   * ex) www.local.kurly.com
+   * 미입력시 rule 값을 참조 (rule 이 여러개인 경우 첫번째 값 참조)
    */
-  target: string;
+  host?: string;
+  /**
+   * 목적지 Origin
+   * ex) https://www.dev.kurly.com
+   */
+  targetOrigin: string;
 }
 
 export interface LocalDevProxyOption {
-  /**
-   * https 사용 여부
-   * *.kurly.com / *.kurlycorp.kr / *.kurly.services 지원
-   * default: false
-   */
-  https?: boolean;
   /**
    * 현재 앱의 홈 Path
    * 최초 실행시 사용
