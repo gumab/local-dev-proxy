@@ -124,7 +124,11 @@ export default class ProcessRunner {
 
     const { homePath = '', openOnStart = true } = config;
     if (openOnStart) {
-      opn(`${hosts[0].https ? 'https' : 'http'}://${hosts[0].host}${homePath}`);
+      if (/^https?:\/\//.test(homePath)) {
+        opn(homePath);
+      } else {
+        opn(`${hosts[0].https ? 'https' : 'http'}://${hosts[0].host}${homePath}`);
+      }
     }
   }
 
