@@ -48,7 +48,7 @@ function main() {
   const runner = new ProcessRunner();
   const { command, configPath } = parseArgv();
 
-  if (process.arch !== 'arm64') {
+  if (process.arch !== 'arm64' || process.platform !== 'darwin') {
     logger.error('는 Apple Silicon Mac 에서만 사용 가능합니다.');
     wrapSpawn(command[0], command.slice(1), { stdio: 'inherit' });
     return;

@@ -1,8 +1,5 @@
 {
   "name": "@thefarmersfront/local-dev-proxy",
-  "os": [
-    "darwin"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefarmersfront/local-dev-proxy.git"
@@ -10,7 +7,7 @@
   "publishConfig": {
     "@thefarmersfront:registry": "https://npm.pkg.github.com/"
   },
-  "version": "0.5.5",
+  "version": "0.5.6",
   "main": "dist/index.ts",
   "types": "dist/index.d.ts",
   "bin": {
