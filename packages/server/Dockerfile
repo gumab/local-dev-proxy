@@ -1,6 +1,6 @@
 FROM node:18
 
-LABEL org.opencontainers.image.source='https://github.com/thefarmersfront/local-dev-proxy'
+LABEL org.opencontainers.image.source='https://github.com/gumab/local-dev-proxy'
 
 ENV LOCALHOST=host.docker.internal
 ENV HTTP_PORT=8080

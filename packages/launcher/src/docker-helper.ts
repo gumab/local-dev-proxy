@@ -18,7 +18,7 @@ async function run() {
 
   logger.log(`프록시 도커 컨테이너를 실행합니다`);
 
-  await spawnAsync('docker pull registry.dev.kurlycorp.kr/local-dev-proxy/local-dev-proxy:latest').catch(() => {
+  await spawnAsync('docker pull ghcr.io/local-dev-proxy/local-dev-proxy:latest').catch(() => {
     // 경고만 하고 스킵
     logger.error('도커 이미지를 가져오는데 실패했습니다. 최초 실행 혹은 업데이트를 하려면 네트워크를 확인해주세요');
   });

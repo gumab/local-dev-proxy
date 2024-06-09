@@ -1,11 +1,11 @@
 {
-  "name": "@thefarmersfront/local-dev-proxy",
+  "name": "@gumab/local-dev-proxy",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thefarmersfront/local-dev-proxy.git"
+    "url": "git+https://github.com/gumab/local-dev-proxy.git"
   },
   "publishConfig": {
-    "@thefarmersfront:registry": "https://npm.pkg.github.com/"
+    "@gumab:registry": "https://npm.pkg.github.com/"
   },
   "version": "0.5.6",
   "main": "dist/index.ts",
@@ -22,8 +22,8 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [],
-  "author": "배창원",
-  "license": "ISC",
+  "author": "Changwon Bae",
+  "license": "MIT",
   "dependencies": {
     "arg": "^5.0.2",
     "better-opn": "^3.0.2",
@@ -33,9 +33,9 @@
     "ssl-validator": "^4.0.0"
   },
   "bugs": {
-    "url": "https://github.com/thefarmersfront/local-dev-proxy/issues"
+    "url": "https://github.com/gumab/local-dev-proxy/issues"
   },
-  "homepage": "https://github.com/thefarmersfront/local-dev-proxy#readme",
+  "homepage": "https://github.com/gumab/local-dev-proxy#readme",
   "description": "",
   "devDependencies": {
     "@types/node-fetch": "^2.6.4",

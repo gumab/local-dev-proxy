@@ -1,7 +1,9 @@
+
+
 /** @type {import('@gumab/local-dev-proxy').LocalDevProxyOption} */
 module.exports = {
   rule: {
-    key: 'example-app',
-    host: 'example.local.my-domain.com',
+    key: 'sample-key',
+    host: 'simple.local.your-domain.com',
   },
 };

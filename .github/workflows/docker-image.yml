@@ -10,12 +10,13 @@ on:
     paths:
       - 'packages/server/**'
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-
   build:
-
-    runs-on: sre-runner
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
@@ -27,7 +28,7 @@ jobs:
       - name: Login to Harbor registry
         uses: docker/login-action@v2
         with:
-          registry: registry.dev.kurlycorp.kr
+          registry: ghcr.io
           username: develop
           password: ${{ secrets.DEV_DOCKER_LOGIN_PASSWORD }}
 
@@ -36,6 +37,6 @@ jobs:
         with:
           context: packages/server
           push: true
-          tags: registry.dev.kurlycorp.kr/local-dev-proxy/local-dev-proxy:latest
+          tags: ghcr.io/local-dev-proxy/local-dev-proxy:latest
           platforms: |
             linux/arm64
