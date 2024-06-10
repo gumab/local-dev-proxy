@@ -13,7 +13,8 @@ function getConfig(configPath: string): LocalDevProxyOption {
     // eslint-disable-next-line import/no-dynamic-require,global-require
     return require(configPath);
   } catch (e) {
-    throw new LdprxError('.ldprxrc.js 파일이 필요합니다');
+    // throw new LdprxError('.ldprxrc.js 파일이 필요합니다');
+    throw new LdprxError('.ldprxrc.js file is required');
   }
 }
 
@@ -49,7 +50,8 @@ function main() {
   const { command, configPath } = parseArgv();
 
   if (process.arch !== 'arm64' || process.platform !== 'darwin') {
-    logger.error('는 Apple Silicon Mac 에서만 사용 가능합니다.');
+    // logger.error('는 Apple Silicon Mac 에서만 사용 가능합니다.');
+    logger.error('is only available on Apple Silicon Mac.');
     wrapSpawn(command[0], command.slice(1), { stdio: 'inherit' });
     return;
   }
@@ -57,7 +59,8 @@ function main() {
   const config = getConfig(configPath);
 
   const configFileWatchListner = async () => {
-    logger.log('config 파일에 변경이 감지되었습니다. 프로세스를 다시 시작합니다', 'blueBright');
+    // logger.log('config 파일에 변경이 감지되었습니다. 프로세스를 다시 시작합니다', 'blueBright');
+    logger.log('Changes detected in config file. Restarting process', 'blueBright');
     try {
       await runner.kill(2);
       await runner.run(command, getConfig(configPath));

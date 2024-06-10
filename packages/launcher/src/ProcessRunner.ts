@@ -12,14 +12,17 @@ import { checkHostDns } from './utils/hosts-helper';
 import { callPromiseSequentially } from './utils/promise-helper';
 
 function makeConfigError(message: string) {
-  return new LdprxError(`.ldprxrc.js 설정이 유효하지 않습니다.\n${message}`);
+  // return new LdprxError(`.ldprxrc.js 설정이 유효하지 않습니다.\n${message}`);
+  return new LdprxError(`.ldprxrc.js configuration is invalid.\n${message}`);
 }
 
 function validateRule(rule: LocalDevProxyRule) {
   if (!rule.key) {
-    throw makeConfigError('key 값이 없습니다');
+    // throw makeConfigError('key 값이 없습니다');
+    throw makeConfigError('Missing "key" value');
   } else if (!rule.host) {
-    throw makeConfigError(`${rule.key}의 host 값이 없습니다`);
+    // throw makeConfigError(`${rule.key}의 host 값이 없습니다`);
+    throw makeConfigError(`Missing "host" value for "${rule.key}"`);
   }
 
   return rule.host;
@@ -27,12 +30,15 @@ function validateRule(rule: LocalDevProxyRule) {
 
 function validateSubRule(rule: LocalDevProxySubRule) {
   if (!rule.key) {
-    throw makeConfigError('key 값이 없습니다');
+    // throw makeConfigError('key 값이 없습니다');
+    throw makeConfigError('Missing "key" value');
   } else if (!rule.targetOrigin) {
-    throw makeConfigError(`${rule.key}의 targetOrigin 값이 없습니다`);
+    // throw makeConfigError(`${rule.key}의 targetOrigin 값이 없습니다`);
+    throw makeConfigError(`Missing "targetOrigin" value for "${rule.key}"`);
   } else if (!/^https?:\/\/[^/]+$/.test(rule.targetOrigin)) {
     throw makeConfigError(
-      `${rule.key}의 targetOrigin 값이 유효하지 않습니다. http[s]://sample.my-domain.com 형식으로 넣어주세요`,
+      // `${rule.key}의 targetOrigin 값이 유효하지 않습니다. http[s]://sample.my-domain.com 형식으로 넣어주세요`,
+      `Invalid "targetOrigin" value for "${rule.key}". Please use the format http[s]://sample.my-domain.com`,
     );
   }
 }
@@ -45,7 +51,8 @@ function validateConfig(config: LocalDevProxyOption) {
   if (mainRules.length > 0) {
     mainRules.forEach(validateRule);
   } else {
-    throw makeConfigError('rule 설정이 하나 이상 있어야 합니다');
+    // throw makeConfigError('rule 설정이 하나 이상 있어야 합니다');
+    throw makeConfigError('At least one rule must be set');
   }
 
   return { mainRules, subRules: config.subRules || [] };
@@ -118,7 +125,8 @@ export default class ProcessRunner {
       await this.kill(code || 0);
     });
     if (!this.cp.pid) {
-      throw new LdprxError('알 수 없는 오류 발생 (child process 의 PID를 찾을 수 없음)');
+      // throw new LdprxError('알 수 없는 오류 발생 (child process 의 PID를 찾을 수 없음)');
+      throw new LdprxError('Unknown error occurred (could not find child process PID)');
     }
     this.registeredRules = await register(localServerPort || (await findNewPort(this.cp.pid)), mainRules, subRules);
 

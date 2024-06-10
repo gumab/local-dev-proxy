@@ -5,6 +5,7 @@ export async function checkSudo() {
     .then(() => true)
     .catch(() => false);
   if (!isSudoable) {
-    process.stdout.write('맥 패스워드를 입력하세요\n');
+    // process.stdout.write('맥 패스워드를 입력하세요\n');
+    process.stdout.write('Please enter your mac OS password\n');
   }
 }

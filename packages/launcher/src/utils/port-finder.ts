@@ -46,10 +46,15 @@ export async function findNewPort(pid: number, timeout?: number): Promise<number
       const processes = currentProcess.filter((x) => pids.includes(x.pid));
       if (processes.length > 1) {
         reject(
+          // new LdprxError(
+          //   `두 개 이상의 웹서버(${processes
+          //     .map((x) => `:${x.port}`)
+          //     .join(',')})가 실행되었습니다. .ldprxrc.js 파일에서 localServerPort 를 지정해주세요.`,
+          // ),
           new LdprxError(
-            `두 개 이상의 웹서버(${processes
+            `More than one web server (${processes
               .map((x) => `:${x.port}`)
-              .join(',')})가 실행되었습니다. .ldprxrc.js 파일에서 localServerPort 를 지정해주세요.`,
+              .join(',')}) is running. Please specify localServerPort in the .ldprxrc.js file.`,
           ),
         );
         clearInterval(interval);
@@ -62,7 +67,8 @@ export async function findNewPort(pid: number, timeout?: number): Promise<number
       }
 
       if (timeout && Date.now() - startTime > timeout) {
-        reject(new Error('서버가 실행된 포트를 찾을 수 없습니다.'));
+        // reject(new Error('서버가 실행된 포트를 찾을 수 없습니다.'));
+        reject(new Error('Cannot find the port on which the server is running.'));
         clearInterval(interval);
       }
     }, 1000);
