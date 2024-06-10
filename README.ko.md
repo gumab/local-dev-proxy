@@ -5,7 +5,7 @@
 
 로컬 개발 환경에서 80(http), 443(https) 포트로 동시에 여러 서버의 서비스를 도와주는 프록시 서버
 
-[![](https://img.shields.io/npm/v/local-dev-proxy?logo=npm)](https://www.npmjs.com/package/local-dev-server)
+[![](https://img.shields.io/npm/v/local-dev-proxy?logo=npm)](https://www.npmjs.com/package/local-dev-proxy)
 [![](https://img.shields.io/badge/github-gumab/local--dev--proxy-blue?logo=github)](https://github.com/gumab/local-dev-proxy)
 [![](https://img.shields.io/badge/OS-macOS(ARM64)-red)](https://support.apple.com/en-us/116943)
 

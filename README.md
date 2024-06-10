@@ -6,7 +6,7 @@
 A proxy server to assist with running multiple server services simultaneously on ports 80 (HTTP) and 443 (HTTPS) in a
 local development environment.
 
-[![](https://img.shields.io/npm/v/local-dev-proxy?logo=npm)](https://www.npmjs.com/package/local-dev-server)
+[![](https://img.shields.io/npm/v/local-dev-proxy?logo=npm)](https://www.npmjs.com/package/local-dev-proxy)
 [![](https://img.shields.io/badge/github-gumab/local--dev--proxy-blue?logo=github)](https://github.com/gumab/local-dev-proxy)
 [![](https://img.shields.io/badge/OS-macOS(ARM64)_only-red)](https://support.apple.com/en-us/116943)
 
