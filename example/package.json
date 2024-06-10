@@ -10,7 +10,7 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "local-dev-proxy": "0.5.7",
+    "local-dev-proxy": "0.5.8",
     "express": "^4.18.2"
   }
 }
