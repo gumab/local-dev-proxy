@@ -20,7 +20,7 @@ requests to the appropriate server based on predefined configurations.
 
 - Access multiple local servers simultaneously on ports 80 and 443.
 - Route requests to the appropriate local server based on host or path configuration.
-- Automatic registration and routing via `/etc/hosts` file.
+- Automatically register host in the `/etc/hosts` file
 - HTTPS support:
     - Automatically issues and applies certificates for local domains.
 
@@ -59,7 +59,7 @@ $ npm install local-dev-proxy --optional
 Create a `.ldprxrc.js` file in the project root and add the following content:
 
 ```js
-/** @type {import('@gumab/local-dev-proxy').LocalDevProxyOption} */
+/** @type {import('local-dev-proxy').LocalDevProxyOption} */
 module.exports = {
   rule: {
     key: 'sample-key',
@@ -67,6 +67,8 @@ module.exports = {
   },
 };
 ```
+
+[Configuration File Samples](./packages/launcher/config-samples)
 
 ### 3. Run
 
@@ -83,3 +85,5 @@ Or
 ```bash
 $ npx ldprx your-run-command
 ```
+
+[Example App](./example)

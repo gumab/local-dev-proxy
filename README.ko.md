@@ -58,7 +58,7 @@ $ npm install local-dev-proxy --optional
 프로젝트 루트에 `.ldprxrc.js` 파일을 생성하고 다음 내용을 추가합니다:
 
 ```js
-/** @type {import('@gumab/local-dev-proxy').LocalDevProxyOption} */
+/** @type {import('local-dev-proxy').LocalDevProxyOption} */
 module.exports = {
   rule: {
     key: 'sample-key',
@@ -66,6 +66,8 @@ module.exports = {
   },
 };
 ```
+
+[Configuration File Samples](./packages/launcher/config-samples)
 
 ### 3. 실행
 
@@ -79,3 +81,5 @@ Or
 ```bash
 $ npx ldprx your-run-command
 ```
+
+[Example App](./example)

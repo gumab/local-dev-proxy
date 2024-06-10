@@ -18,13 +18,13 @@ async function run() {
 
   logger.log(`프록시 도커 컨테이너를 실행합니다`);
 
-  await spawnAsync('docker pull ghcr.io/local-dev-proxy/local-dev-proxy:latest').catch(() => {
+  await spawnAsync('docker pull docker.io/gumab/local-dev-proxy:latest').catch(() => {
     // 경고만 하고 스킵
     logger.error('도커 이미지를 가져오는데 실패했습니다. 최초 실행 혹은 업데이트를 하려면 네트워크를 확인해주세요');
   });
 
   await spawnAsync(
-    'docker run -d --name local-dev-proxy -p 80:8080 -p 443:8443 -p 8090:8090 registry.dev.kurlycorp.kr/local-dev-proxy/local-dev-proxy:latest',
+    'docker run -d --name local-dev-proxy -p 80:8080 -p 443:8443 -p 8090:8090 docker.io/gumab/local-dev-proxy:latest',
   ).catch(() => {
     throw new LdprxError('도커 실행에 실패하였습니다. 80/443 포트 점유 확인 후 다시 이용해주세요.');
   });

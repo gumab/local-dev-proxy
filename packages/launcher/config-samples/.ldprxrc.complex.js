@@ -4,7 +4,7 @@
 
 const host = 'www.local.your-domain.com';
 
-/** @type {import('@gumab/local-dev-proxy').LocalDevProxyOption} */
+/** @type {import('local-dev-proxy').LocalDevProxyOption} */
 module.exports = {
   rule: {
     key: 'complex-app',

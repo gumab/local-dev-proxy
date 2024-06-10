@@ -1,13 +1,14 @@
 {
-  "name": "@gumab/local-dev-proxy",
+  "name": "local-dev-proxy",
+  "description": "Serve multiple local servers on ports 80/443 at the same time, with HTTPS support",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gumab/local-dev-proxy.git"
   },
   "publishConfig": {
-    "@gumab:registry": "https://npm.pkg.github.com/"
+    "registry": "https://registry.npmjs.org/"
   },
-  "version": "0.5.6",
+  "version": "0.5.7",
   "main": "dist/index.ts",
   "types": "dist/index.d.ts",
   "bin": {
@@ -19,7 +20,7 @@
     "build": "tsc",
     "dev": "ts-node src/bin/local-dev-proxy.ts config-samples/.ldprxrc.example.js node sample-server.js",
     "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish",
-    "prepublishOnly": "npm run clean && npm run build"
+    "prepublishOnly": "cp ../../README.md ./ && npm run clean && npm run build"
   },
   "keywords": [],
   "author": "Changwon Bae",
@@ -36,7 +37,6 @@
     "url": "https://github.com/gumab/local-dev-proxy/issues"
   },
   "homepage": "https://github.com/gumab/local-dev-proxy#readme",
-  "description": "",
   "devDependencies": {
     "@types/node-fetch": "^2.6.4",
     "@types/prompts": "^2.4.4",
