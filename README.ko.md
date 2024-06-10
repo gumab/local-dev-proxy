@@ -5,11 +5,13 @@
 
 로컬 개발 환경에서 80(http), 443(https) 포트로 동시에 여러 서버의 서비스를 도와주는 프록시 서버
 
-![](https://img.shields.io/badge/os-macOS(ARM64)-blue)
+[![](https://img.shields.io/npm/v/local-dev-proxy?logo=npm)](https://www.npmjs.com/package/local-dev-server)
+[![](https://img.shields.io/badge/github-gumab/local--dev--proxy-blue?logo=github)](https://github.com/gumab/local-dev-proxy)
+[![](https://img.shields.io/badge/OS-macOS(ARM64)-red)](https://support.apple.com/en-us/116943)
 
 ## 개요
 
-<img src="./docs/diagram.svg" width=400>
+<img src="./docs/diagram.svg">
 
 로컬 개발 시 여러 서버를 관리하는 것은 도전적일 수 있습니다.
 개발을 하다 보면 동시에 여러 대의 서버를 80포트로 실행하고 싶은 경우가 있습니다.
@@ -42,7 +44,7 @@
 
 ## Flow
 
-<img src="./docs/flow.svg" width=500>
+<img src="./docs/flow.svg">
 
 ## 빠른 시작
 

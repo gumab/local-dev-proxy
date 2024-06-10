@@ -6,11 +6,13 @@
 A proxy server to assist with running multiple server services simultaneously on ports 80 (HTTP) and 443 (HTTPS) in a
 local development environment.
 
-![](https://img.shields.io/badge/os-macOS(ARM64)-blue)
+[![](https://img.shields.io/npm/v/local-dev-proxy?logo=npm)](https://www.npmjs.com/package/local-dev-server)
+[![](https://img.shields.io/badge/github-gumab/local--dev--proxy-blue?logo=github)](https://github.com/gumab/local-dev-proxy)
+[![](https://img.shields.io/badge/OS-macOS(ARM64)_only-red)](https://support.apple.com/en-us/116943)
 
 ## Overview
 
-<img src="./docs/diagram.svg" width=400>
+<img src="./docs/diagram.svg">
 
 Managing multiple servers during local development can be challenging. Often, you might want to run multiple servers
 simultaneously on port 80. **Local Dev Proxy** addresses this issue by dynamically registering local servers and routing
@@ -43,7 +45,7 @@ requests to the appropriate server based on predefined configurations.
 
 ## Flow
 
-<img src="./docs/flow.svg" width=500>
+<img src="./docs/flow.svg">
 
 ## Quick Start
 
@@ -76,7 +78,7 @@ module.exports = {
 
 ```json
 "scripts": {
-  "start": "ldprx your-run-command"
+"start": "ldprx your-run-command"
 }
 ```
 
