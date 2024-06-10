@@ -8,6 +8,7 @@ local development environment.
 
 [![](https://img.shields.io/npm/v/local-dev-proxy?logo=npm)](https://www.npmjs.com/package/local-dev-proxy)
 [![](https://img.shields.io/badge/github-gumab/local--dev--proxy-blue?logo=github)](https://github.com/gumab/local-dev-proxy)
+[![](https://img.shields.io/badge/docker-local--dev--proxy(server)-2496ED?logo=docker)](https://hub.docker.com/r/gumab/local-dev-proxy)
 [![](https://img.shields.io/badge/OS-macOS(ARM64)_only-red)](https://support.apple.com/en-us/116943)
 
 ## Overview
@@ -78,7 +79,7 @@ module.exports = {
 
 ```json
 "scripts": {
-"start": "ldprx your-run-command"
+  "start": "ldprx your-run-command"
 }
 ```
 
