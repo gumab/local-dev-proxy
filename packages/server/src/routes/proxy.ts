@@ -52,11 +52,17 @@ function findProxyRule(rules: RouteRule[], reqHost: string, reqPath?: string, re
 function makeProxyOption(req: Request): { target: string; ignorePath?: boolean; cookieDomainRewrite?: string } {
   const rule = findProxyRule(storage.getRules(), req.hostname, req.path, req.headers['referer']);
   if (!rule) {
-    throw new NotFoundError(`매칭되는 서버가 없습니다. (${req.protocol}://${req.hostname}${req.path})`);
+    throw new NotFoundError(
+      `[local-dev-proxy] No matching server found. (${req.protocol}://${req.hostname}${req.path})`,
+    );
+    // throw new NotFoundError(`매칭되는 서버가 없습니다. (${req.protocol}://${req.hostname}${req.path})`);
   } else if (!rule.https && req.protocol === 'https') {
     throw new NoneSslError(
-      `HTTPS 가 설정되지 않았습니다. .ldprxrc.js 파일을 확인해주세요 (${req.protocol}://${req.hostname}${req.path})`,
+      `[local-dev-proxy] HTTPS is not configured. Please check the .ldprxrc.js file (${req.protocol}://${req.hostname}${req.path})`,
     );
+    // throw new NoneSslError(
+    //   `[local-dev-proxy] HTTPS 가 설정되지 않았습니다. .ldprxrc.js 파일을 확인해주세요 (${req.protocol}://${req.hostname}${req.path})`,
+    // );
   }
 
   if (rule.pathRewrite) {

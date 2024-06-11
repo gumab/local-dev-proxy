@@ -8,7 +8,7 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "version": "0.5.11",
+  "version": "0.5.12",
   "main": "dist/index.ts",
   "types": "dist/index.d.ts",
   "bin": {
@@ -22,7 +22,17 @@
     "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish",
     "prepublishOnly": "cp ../../README.md ./ && npm run clean && npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "local",
+    "server",
+    "proxy",
+    "ssl",
+    "tls",
+    "https",
+    "self-signed",
+    "development",
+    "tool"
+  ],
   "author": "Changwon Bae",
   "license": "MIT",
   "dependencies": {
