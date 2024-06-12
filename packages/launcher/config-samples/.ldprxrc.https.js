@@ -4,6 +4,7 @@
 /** @type {import('local-dev-proxy').LocalDevProxyOption} */
 module.exports = {
   rule: {
+    https: true,
     key: 'sample-key',
     host: 'https.local.your-domain.com',
   },
