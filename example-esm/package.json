@@ -1,8 +1,9 @@
 {
   "name": "local-dev-proxy-example",
+  "type": "module",
   "scripts": {
     "start:example": "ldprx node example.js",
-    "start:example:https": "ldprx .ldprxrc.https.js node example.js"
+    "start:example:https": "ldprx .ldprxrc.https.cjs node example.js"
   },
   "version": "1.0.0",
   "main": "example.js",

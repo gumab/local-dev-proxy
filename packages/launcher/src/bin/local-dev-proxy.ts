@@ -7,6 +7,23 @@ import ProcessRunner from '../ProcessRunner';
 import { LdprxError } from '../libs/LdprxError';
 import { wrapSpawn } from '../utils';
 
+function getPackageType(): 'CommonJS' | 'ESModule' {
+  try {
+    const jsonPath = process.env.npm_package_json;
+    if (jsonPath) {
+      // eslint-disable-next-line import/no-dynamic-require,global-require,@typescript-eslint/no-var-requires
+      const json = require(jsonPath);
+      if (json.type === 'module') {
+        return 'ESModule';
+      }
+    }
+  } catch {
+    // DO NOTHING
+  }
+
+  return 'CommonJS';
+}
+
 function getConfig(configPath: string): LocalDevProxyOption {
   try {
     delete require.cache[configPath];
@@ -14,7 +31,7 @@ function getConfig(configPath: string): LocalDevProxyOption {
     return require(configPath);
   } catch (e) {
     // throw new LdprxError('.ldprxrc.js 파일이 필요합니다');
-    throw new LdprxError('.ldprxrc.js file is required');
+    throw new LdprxError(`${configPath.replace(/^.+\//g, '')} file is required`);
   }
 }
 
@@ -32,7 +49,13 @@ function parseArgv(): {
 } {
   const argv = process.argv.slice(2);
 
-  if (/\.ldprxrc.*\.js$/.test(argv[0])) {
+  const type = getPackageType();
+
+  if (/\.ldprxrc.*\.c?js$/.test(argv[0])) {
+    if (!argv[0].endsWith(type === 'CommonJS' ? '.js' : '.cjs')) {
+      throw new LdprxError('Check the file format. (CommonJS: .js, ESModule: .cjs)');
+    }
+
     return {
       configPath: path.join(process.cwd(), argv[0]),
       command: argv.slice(1),
@@ -40,7 +63,7 @@ function parseArgv(): {
   }
 
   return {
-    configPath: path.join(process.cwd(), '.ldprxrc.js'),
+    configPath: path.join(process.cwd(), `.ldprxrc.${type === 'CommonJS' ? 'js' : 'cjs'}`),
     command: argv,
   };
 }
@@ -49,7 +72,7 @@ function main() {
   const runner = new ProcessRunner();
   const { command, configPath } = parseArgv();
 
-  if (process.arch !== 'arm64' || process.platform !== 'darwin') {
+  if (!['arm64', 'x64'].includes(process.arch) || process.platform !== 'darwin') {
     // logger.error('는 Apple Silicon Mac 에서만 사용 가능합니다.');
     logger.error('is only available on Apple Silicon Mac.');
     wrapSpawn(command[0], command.slice(1), { stdio: 'inherit' });

@@ -59,6 +59,7 @@ $ npm install local-dev-proxy --optional
 ### 2. Configuration 파일 설정
 
 프로젝트 루트에 `.ldprxrc.js` 파일을 생성하고 다음 내용을 추가합니다:
+> 패키지 설정이 ESModule 인 경우 `.ldprxrc.cjs` 를 사용합니다.
 
 ```js
 /** @type {import('local-dev-proxy').LocalDevProxyOption} */

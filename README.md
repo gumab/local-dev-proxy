@@ -60,6 +60,7 @@ $ npm install local-dev-proxy --optional
 ### 2. Configure the Configuration File
 
 Create a `.ldprxrc.js` file in the project root and add the following content:
+> If your package is an ESModule, use `.ldprxrc.cjs` instead.
 
 ```js
 /** @type {import('local-dev-proxy').LocalDevProxyOption} */
