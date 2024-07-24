@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import { execAsync, spawnAsync } from './utils';
 import { logger } from './utils/logger';
 import { LdprxError } from './libs/LdprxError';
+import { t } from './i18n';
 
 async function run() {
   const ps = await execAsync('docker ps|grep "0.0.0.0:80->"')
@@ -9,29 +10,24 @@ async function run() {
     .catch(() => undefined);
 
   if (ps) {
-    // logger.warn(`현재 80포트를 점유중인 컨테이너를 중지합니다 (${ps})`);
-    logger.warn(`Stopping the container currently occupying port 80 (${ps})`);
+    logger.warn(t('Stopping the container currently occupying port 80 ({{ps}})', { ps }));
     await spawnAsync(`docker stop ${ps}`);
   }
   await spawnAsync('docker rm -f local-dev-proxy').catch(() => {
-    // throw new LdprxError('Docker Daemon 을 찾을 수 없습니다. 설치 혹은 실행 후 이용해주세요.');
-    throw new LdprxError('Docker Daemon not found. Please install or start it before proceeding.');
+    throw new LdprxError(t('Docker Daemon not found. Please install or start it before proceeding.'));
   });
 
-  // logger.log(`프록시 도커 컨테이너를 실행합니다`);
-  logger.log(`Starting proxy Docker container`);
+  logger.log(t('Starting proxy Docker container'));
 
   await spawnAsync('docker pull docker.io/gumab/local-dev-proxy:latest').catch(() => {
     // 경고만 하고 스킵
-    // logger.error('도커 이미지를 가져오는데 실패했습니다. 최초 실행 혹은 업데이트를 하려면 네트워크를 확인해주세요');
-    logger.error('Failed to fetch Docker image. Please check your network connection for the first run or updates.');
+    logger.error(t('Failed to fetch Docker image. Please check your network connection for the first run or updates.'));
   });
 
   await spawnAsync(
     'docker run -d --name local-dev-proxy -p 80:8080 -p 443:8443 -p 8090:8090 docker.io/gumab/local-dev-proxy:latest',
   ).catch(() => {
-    // throw new LdprxError('도커 실행에 실패하였습니다. 80/443 포트 점유 확인 후 다시 이용해주세요.');
-    throw new LdprxError('Failed to start Docker. Please check if ports 80/443 are occupied and try again.');
+    throw new LdprxError(t('Failed to start Docker. Please check if ports 80/443 are occupied and try again.'));
   });
 }
 
@@ -54,8 +50,7 @@ export async function waitForDockerRunning() {
         // eslint-disable-next-line no-await-in-loop
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-      // throw new LdprxError('도커 서버의 상태를 확인해주세요');
-      throw new LdprxError('Please check the status of the Docker server.');
+      throw new LdprxError(t('Please check the status of the Docker server.'));
     })();
   }
 }

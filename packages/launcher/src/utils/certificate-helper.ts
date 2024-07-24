@@ -5,6 +5,7 @@ import { isValidCertKeyPair, isValidCertToDomain } from 'ssl-validator';
 import { execAsync } from './index';
 import { logger } from './logger';
 import { checkSudo } from './sudo-helper';
+import { t } from '../i18n';
 
 const EMAIL_ADDRESS = 'launcher@ldprx.dev';
 
@@ -55,8 +56,10 @@ export async function setCertificateFile(keyFilePath: string, certFilePath: stri
   const { trustCert } = await prompts({
     type: 'confirm',
     name: 'trustCert',
-    // message: `[local-dev-proxy] HTTPS 사용을 위한 인증서가 설치되지 않았습니다. 정상적인 사용을 위해서는 인증서 설치가 필요합니다.\n${cn} 인증서를 신뢰할 수 있는 인증서에 추가하시겠습니까?`,
-    message: `[local-dev-proxy] Certificate for HTTPS usage is not installed. For proper usage, certificate installation is required.\nWould you like to add the "${cn}" certificate to the trusted certificates?`,
+    message: `[local-dev-proxy] ${t(
+      'Certificate for HTTPS usage is not installed. For proper usage, certificate installation is required.\nWould you like to add the "{{cn}}" certificate to the trusted certificates?',
+      { cn },
+    )}`,
     initial: true,
   });
   if (trustCert) {
@@ -75,11 +78,9 @@ export async function setCertificateFile(keyFilePath: string, certFilePath: stri
         .concat(`sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ${certFilePath}`)
         .join(' && '),
     );
-    // logger.log('인증서 설치가 완료되었습니다.');
-    logger.log('Certificate installation is complete.');
+    logger.log(t('Certificate installation is complete.'));
   } else {
-    // throw new Error('사용자 취소');
-    throw new Error('User canceled');
+    throw new Error(t('User canceled'));
   }
 }
 
@@ -90,18 +91,18 @@ export async function checkCertificates(host: string) {
     await execAsync(`curl -o ${tempKeyPath} http://localhost/__setting/download-key`);
     await setCertificateFile(tempKeyPath, tempCertPath, host);
     await execAsync(`curl -F 'data=@${tempCertPath}' http://localhost/__setting/register-cert`);
-    // logger.log(`${tempCertPath} 인증서를 이용하여 https://${host} 가 활성화됩니다.`);
-    logger.log(`"https://${host}" will be activated using the certificate at "${tempCertPath}".`);
+    logger.log(
+      t('"https://{{host}}" will be activated using the certificate at "{{tempCertPath}}".', {
+        host,
+        tempCertPath,
+      }),
+    );
   } catch (e) {
-    // logger.warn(
-    //   `인증서 설정이 올바르게 되지 않아 https 서비스가 정상적으로 동작하지 않을 수 있습니다.${
-    //     e instanceof Error ? `\n${e.message}` : ''
-    //   }`,
-    // );
     logger.warn(
-      `Certificate configuration is incorrect, which may cause the HTTPS service to not function properly.${
-        e instanceof Error ? `\n${e.message}` : ''
-      }`,
+      t(
+        'Certificate configuration is incorrect, which may cause the HTTPS service to not function properly.{{errorMessage}}',
+        { errorMessage: e instanceof Error ? `\n${e.message}` : '' },
+      ),
     );
   } finally {
     await execAsync(`rm -f ${tempKeyPath}`);

@@ -55,6 +55,12 @@ export interface LocalDevProxySubRule extends Omit<LocalDevProxyRule, 'host'> {
 
 export interface LocalDevProxyOption {
   /**
+   * @description [ko] 언어 설정
+   * @description [en] Language setting
+   * @default 'en'
+   */
+  language?: 'ko' | 'en';
+  /**
    * @description [ko] 로컬서버가 실행될 포트 - 'auto' 일 경우 실행된 프로세스에서 자동으로 찾습니다. 두개 이상의 서버를 띄워야 하는 경우에만 명시적으로 사용
    * @description [en] Port on which the local server will run - If 'auto', it will automatically find the port from the running process. Used explicitly only when more than one server needs to be launched
    * @default 'auto'

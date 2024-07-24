@@ -6,6 +6,7 @@ import { logger } from '../utils/logger';
 import ProcessRunner from '../ProcessRunner';
 import { LdprxError } from '../libs/LdprxError';
 import { wrapSpawn } from '../utils';
+import i18n, { t } from '../i18n';
 
 function getPackageType(): 'CommonJS' | 'ESModule' {
   try {
@@ -30,8 +31,7 @@ function getConfig(configPath: string): LocalDevProxyOption {
     // eslint-disable-next-line import/no-dynamic-require,global-require
     return require(configPath);
   } catch (e) {
-    // throw new LdprxError('.ldprxrc.js 파일이 필요합니다');
-    throw new LdprxError(`${configPath.replace(/^.+\//g, '')} file is required`);
+    throw new LdprxError(t('{{path}} file is required', { path: configPath.replace(/^.+\//g, '') }));
   }
 }
 
@@ -53,7 +53,7 @@ function parseArgv(): {
 
   if (/\.ldprxrc.*\.c?js$/.test(argv[0])) {
     if (!argv[0].endsWith(type === 'CommonJS' ? '.js' : '.cjs')) {
-      throw new LdprxError('Check the file format. (CommonJS: .js, ESModule: .cjs)');
+      throw new LdprxError(t('Check the file format. (CommonJS: .js, ESModule: .cjs)'));
     }
 
     return {
@@ -73,17 +73,18 @@ function main() {
   const { command, configPath } = parseArgv();
 
   if (!['arm64', 'x64'].includes(process.arch) || process.platform !== 'darwin') {
-    // logger.error('는 Apple Silicon Mac 에서만 사용 가능합니다.');
-    logger.error('is only available on Apple Silicon Mac.');
+    logger.error(t('is only available on Apple Silicon Mac.'));
     wrapSpawn(command[0], command.slice(1), { stdio: 'inherit' });
     return;
   }
 
   const config = getConfig(configPath);
+  if (config.language) {
+    i18n.changeLanguage(config.language);
+  }
 
   const configFileWatchListner = async () => {
-    // logger.log('config 파일에 변경이 감지되었습니다. 프로세스를 다시 시작합니다', 'blueBright');
-    logger.log('Changes detected in config file. Restarting process', 'blueBright');
+    logger.log(t('Changes detected in config file. Restarting process'), 'blueBright');
     try {
       await runner.kill(2);
       await runner.run(command, getConfig(configPath));
@@ -109,7 +110,7 @@ function main() {
         return;
       }
       isExited = true;
-      logger.log(`process stopped by ${signal}`);
+      logger.log(t('process stopped by {{signal}}', { signal }));
       await runner.kill(signals[signal]);
       unwatchFile(configPath, configFileWatchListner);
       process.exit(128 + signals[signal]);

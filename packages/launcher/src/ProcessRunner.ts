@@ -10,19 +10,17 @@ import { LdprxError } from './libs/LdprxError';
 import { checkCertificates } from './utils/certificate-helper';
 import { checkHostDns } from './utils/hosts-helper';
 import { callPromiseSequentially } from './utils/promise-helper';
+import { t } from './i18n';
 
 function makeConfigError(message: string) {
-  // return new LdprxError(`.ldprxrc.js 설정이 유효하지 않습니다.\n${message}`);
-  return new LdprxError(`.ldprxrc.js configuration is invalid.\n${message}`);
+  return new LdprxError(t('.ldprxrc.js configuration is invalid.\n{{message}}', { message }));
 }
 
 function validateRule(rule: LocalDevProxyRule) {
   if (!rule.key) {
-    // throw makeConfigError('key 값이 없습니다');
-    throw makeConfigError('Missing "key" value');
+    throw makeConfigError(t('Missing "key" value'));
   } else if (!rule.host) {
-    // throw makeConfigError(`${rule.key}의 host 값이 없습니다`);
-    throw makeConfigError(`Missing "host" value for "${rule.key}"`);
+    throw makeConfigError(t('Missing "host" value for "{{key}}"', { key: rule.key }));
   }
 
   return rule.host;
@@ -30,15 +28,14 @@ function validateRule(rule: LocalDevProxyRule) {
 
 function validateSubRule(rule: LocalDevProxySubRule) {
   if (!rule.key) {
-    // throw makeConfigError('key 값이 없습니다');
-    throw makeConfigError('Missing "key" value');
+    throw makeConfigError(t('Missing "key" value for some sub-rule'));
   } else if (!rule.targetOrigin) {
-    // throw makeConfigError(`${rule.key}의 targetOrigin 값이 없습니다`);
-    throw makeConfigError(`Missing "targetOrigin" value for "${rule.key}"`);
+    throw makeConfigError(t('Missing "targetOrigin" value for "{{key}}"', { key: rule.key }));
   } else if (!/^https?:\/\/[^/]+$/.test(rule.targetOrigin)) {
     throw makeConfigError(
-      // `${rule.key}의 targetOrigin 값이 유효하지 않습니다. http[s]://sample.my-domain.com 형식으로 넣어주세요`,
-      `Invalid "targetOrigin" value for "${rule.key}". Please use the format http[s]://sample.my-domain.com`,
+      t('Invalid "targetOrigin" value for "{{key}}". Please use the format http[s]://sample.my-domain.com', {
+        key: rule.key,
+      }),
     );
   }
 }
@@ -48,11 +45,10 @@ function validateConfig(config: LocalDevProxyOption) {
 
   config.subRules?.forEach((subRule) => validateSubRule(subRule));
 
-  if (mainRules.length > 0) {
+  if (config.rule && mainRules.length > 0) {
     mainRules.forEach(validateRule);
   } else {
-    // throw makeConfigError('rule 설정이 하나 이상 있어야 합니다');
-    throw makeConfigError('At least one rule must be set');
+    throw makeConfigError(t('At least one rule must be set'));
   }
 
   return { mainRules, subRules: config.subRules || [] };
@@ -125,8 +121,7 @@ export default class ProcessRunner {
       await this.kill(code || 0);
     });
     if (!this.cp.pid) {
-      // throw new LdprxError('알 수 없는 오류 발생 (child process 의 PID를 찾을 수 없음)');
-      throw new LdprxError('Unknown error occurred (could not find child process PID)');
+      throw new LdprxError(t('Unknown error occurred (could not find child process PID)'));
     }
     this.registeredRules = await register(localServerPort || (await findNewPort(this.cp.pid)), mainRules, subRules);
 

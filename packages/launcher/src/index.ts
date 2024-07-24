@@ -3,6 +3,7 @@ import { healthCheck, waitForDockerRunning } from './docker-helper';
 import { LocalDevProxyOption, LocalDevProxyRule, LocalDevProxySubRule, RouteRuleRequest } from './types';
 import { logger } from './utils/logger';
 import { LdprxError } from './libs/LdprxError';
+import { t } from './i18n';
 
 export type { LocalDevProxyOption };
 
@@ -49,9 +50,17 @@ export async function register(port: number, mainRules: LocalDevProxyRule[], sub
 
   if (res.status === 200) {
     if (mainRule.https) {
-      logger.log(`Registration complete [https://${mainRule.host}, http://${mainRule.host} >> ${targetOrigin}]`);
+      logger.log(
+        t('Registration complete {{info}}', {
+          info: `[https://${mainRule.host}, http://${mainRule.host} >> ${targetOrigin}]`,
+        }),
+      );
     } else {
-      logger.log(`Registration complete [http://${mainRule.host} >> ${targetOrigin}]`);
+      logger.log(
+        t('Registration complete {{info}}', {
+          info: `[http://${mainRule.host} >> ${targetOrigin}]`,
+        }),
+      );
     }
   } else {
     throw new LdprxError(`Registration failed (${res.statusText})`);
@@ -72,10 +81,8 @@ export async function deregister(rules: { key: string; target: string }[]) {
   });
 
   if (res.status === 200) {
-    // logger.log(`등록 해제 완료 (${rules.map((x) => x.key).toString()})`);
-    logger.log(`Unregistration complete (${rules.map((x) => x.key).toString()})`);
+    logger.log(t('Unregistration complete ({{keys}})', { keys: rules.map((x) => x.key).toString() }));
   } else {
-    // throw new LdprxError(`등록 해제 실패 (${res.statusText})`);
-    throw new LdprxError(`Unregistration failed (${res.statusText})`);
+    throw new LdprxError(t('Unregistration failed ({{statusText}})', { statusText: res.statusText }));
   }
 }
