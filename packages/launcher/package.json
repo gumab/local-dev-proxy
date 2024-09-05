@@ -18,7 +18,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "tsc",
-    "dev": "ts-node src/bin/local-dev-proxy.ts config-samples/.ldprxrc.simple.js node sample-server.js",
+    "dev": "tsc --watch",
+    "dev-server": "ts-node src/bin/local-dev-proxy.ts config-samples/.ldprxrc.simple.js node sample-server.js",
     "patch-publish": "npm version patch -m \"launcher v%s\" && npm publish",
     "prepublishOnly": "cp ../../README.md ./ && npm run clean && npm run build"
   },
@@ -49,8 +50,11 @@
   },
   "homepage": "https://github.com/gumab/local-dev-proxy#readme",
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/node-fetch": "^2.6.4",
     "@types/prompts": "^2.4.4",
+    "eslint": "^8.48.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }

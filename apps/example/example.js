@@ -3,7 +3,7 @@ const express = require('express');
 const httpPort = 8888;
 
 async function main() {
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   const app = express();
 
   app.get('/', (req, res) => {

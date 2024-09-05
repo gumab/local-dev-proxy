@@ -24,7 +24,7 @@ function getStringOrRegex(regexInput?: string | null, strInput?: string | null) 
   }
 }
 
-const settingRouter = express.Router();
+const settingRouter: express.Router = express.Router();
 settingRouter.use(bodyParser.json());
 
 const isLocalHost = (input: string) => /localhost|127\.0\.0\.1/.test(input);

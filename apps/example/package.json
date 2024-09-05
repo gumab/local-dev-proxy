@@ -1,6 +1,7 @@
 {
   "name": "local-dev-proxy-example",
   "scripts": {
+    "dev": "ldprx node example.js",
     "start:example": "ldprx node example.js",
     "start:example:https": "ldprx .ldprxrc.https.js node example.js"
   },
@@ -10,7 +11,7 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "local-dev-proxy": "0.5.13",
+    "local-dev-proxy": "workspace:*",
     "express": "^4.18.2"
   }
 }

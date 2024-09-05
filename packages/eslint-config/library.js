@@ -1,3 +1,4 @@
+/** @type {import("eslint").Linter.Config} */
 module.exports = {
   ignorePatterns: ['**/dist/**/*'],
   root: true,
@@ -8,7 +9,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 12,
   },
-  extends: ['eslint:recommended', 'airbnb', 'prettier'],
+  extends: ['eslint:recommended', 'airbnb', 'prettier', 'turbo'],
   plugins: ['prettier'],
   settings: {
     'import/resolver': {
